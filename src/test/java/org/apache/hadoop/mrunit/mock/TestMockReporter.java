@@ -17,18 +17,19 @@
  */
 package org.apache.hadoop.mrunit.mock;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.apache.hadoop.mapred.InputSplit;
 import org.junit.Test;
 
-
 @SuppressWarnings("deprecation")
-public class TestMockReporter extends TestCase {
+public class TestMockReporter {
 
   @Test
   public void testGetInputSplitForMapper() {
-    InputSplit split = new MockReporter(MockReporter.ReporterType.Mapper).getInputSplit();
+    InputSplit split = new MockReporter(MockReporter.ReporterType.Mapper)
+        .getInputSplit();
     assertTrue(null != split);
   }
 
@@ -44,4 +45,3 @@ public class TestMockReporter extends TestCase {
     }
   }
 }
-

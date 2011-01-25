@@ -18,13 +18,12 @@
 package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -37,7 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("deprecation")
-public class TestMapReduceDriver extends TestCase {
+public class TestMapReduceDriver {
 
   private static final int FOO_IN_A = 42;
   private static final int FOO_IN_B = 10;
@@ -46,9 +45,7 @@ public class TestMapReduceDriver extends TestCase {
 
   private Mapper<Text, LongWritable, Text, LongWritable> mapper;
   private Reducer<Text, LongWritable, Text, LongWritable> reducer;
-  private MapReduceDriver<Text, LongWritable,
-                  Text, LongWritable,
-                  Text, LongWritable> driver;
+  private MapReduceDriver<Text, LongWritable, Text, LongWritable, Text, LongWritable> driver;
 
   private MapReduceDriver<Text, Text, Text, Text, Text, Text> driver2;
 
@@ -56,10 +53,8 @@ public class TestMapReduceDriver extends TestCase {
   public void setUp() throws Exception {
     mapper = new IdentityMapper<Text, LongWritable>();
     reducer = new LongSumReducer<Text>();
-    driver = new MapReduceDriver<Text, LongWritable,
-                                 Text, LongWritable,
-                                 Text, LongWritable>(
-                        mapper, reducer);
+    driver = new MapReduceDriver<Text, LongWritable, Text, LongWritable, Text, LongWritable>(
+        mapper, reducer);
     // for shuffle tests
     driver2 = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
   }
@@ -68,57 +63,48 @@ public class TestMapReduceDriver extends TestCase {
   public void testRun() {
     List<Pair<Text, LongWritable>> out = null;
     try {
-      out = driver
-              .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-              .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-              .withInput(new Text("bar"), new LongWritable(BAR_IN))
-              .run();
+      out = driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+          .withInput(new Text("bar"), new LongWritable(BAR_IN)).run();
     } catch (IOException ioe) {
       fail();
     }
 
-    List<Pair<Text, LongWritable>> expected =
-      new ArrayList<Pair<Text, LongWritable>>();
+    List<Pair<Text, LongWritable>> expected = new ArrayList<Pair<Text, LongWritable>>();
     expected.add(new Pair<Text, LongWritable>(new Text("bar"),
-            new LongWritable(BAR_IN)));
+        new LongWritable(BAR_IN)));
     expected.add(new Pair<Text, LongWritable>(new Text("foo"),
-            new LongWritable(FOO_OUT)));
+        new LongWritable(FOO_OUT)));
 
     assertListEquals(out, expected);
   }
 
   @Test
   public void TesttestRun1() {
-    driver
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-            .runTest();
+    driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+        .withInput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
   }
 
   @Test
   public void TesttestRun2() {
-    driver
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-            .runTest();
+    driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+        .withInput(new Text("bar"), new LongWritable(BAR_IN))
+        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
   }
 
   @Test
   public void TesttestRun3() {
     try {
-      driver
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-            .withInput(new Text("bar"), new LongWritable(BAR_IN))
-            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-            .runTest();
+      driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+          .withInput(new Text("bar"), new LongWritable(BAR_IN))
+          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+          .withOutput(new Text("bar"), new LongWritable(BAR_IN)).runTest();
       fail();
     } catch (RuntimeException re) {
       // expected
@@ -133,9 +119,7 @@ public class TestMapReduceDriver extends TestCase {
   @Test
   public void testEmptyInputWithOutputFails() {
     try {
-      driver
-              .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-              .runTest();
+      driver.withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -208,7 +192,6 @@ public class TestMapReduceDriver extends TestCase {
     assertListEquals(expected, outputs);
   }
 
-
   // shuffle multiple keys that are out-of-order to start.
   @Test
   public void testMultiShuffle2() {
@@ -235,4 +218,3 @@ public class TestMapReduceDriver extends TestCase {
   }
 
 }
-
