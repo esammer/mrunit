@@ -43,6 +43,7 @@ import org.apache.hadoop.mrunit.types.Pair;
  * This is designed to handle a single (k, v)* -> (k, v)* case from the
  * Mapper/Reducer pair, representing a single unit test.
  */
+@SuppressWarnings("deprecation")
 public class MapReduceDriver<K1, V1, K2, V2, K3, V3>
     extends TestDriver<K1, V1, K3, V3> {
 

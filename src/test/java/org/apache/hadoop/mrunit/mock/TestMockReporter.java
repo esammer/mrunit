@@ -23,6 +23,7 @@ import org.apache.hadoop.mapred.InputSplit;
 import org.junit.Test;
 
 
+@SuppressWarnings("deprecation")
 public class TestMockReporter extends TestCase {
 
   @Test
