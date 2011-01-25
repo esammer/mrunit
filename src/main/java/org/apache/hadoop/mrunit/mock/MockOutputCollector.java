@@ -17,7 +17,6 @@
  */
 package org.apache.hadoop.mrunit.mock;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,15 +25,15 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * OutputCollector to use in the test framework for Mapper and Reducer
- * classes. Accepts a set of output (k, v) pairs and returns them to the
- * framework for validation.
- *
+ * OutputCollector to use in the test framework for Mapper and Reducer classes.
+ * Accepts a set of output (k, v) pairs and returns them to the framework for
+ * validation.
+ * 
  * BUG: Currently, this does not make deep copies of values passed to collect().
  * So emitting the same Text object (for instance) repeatedly, with different
  * internal string data each time, is not tested in the same way that Hadoop's
  * OutputCollector works.
- *
+ * 
  */
 public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
 
@@ -46,11 +45,11 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
 
   /**
    * Accepts another (key, value) pair as an output of this mapper/reducer.
-   *
-   * BUG: Currently, this does not make deep copies of values passed to collect().
-   * So emitting the same Text object (for instance) repeatedly, with different
-   * internal string data each time, is not tested in the same way that Hadoop's
-   * OutputCollector works.
+   * 
+   * BUG: Currently, this does not make deep copies of values passed to
+   * collect(). So emitting the same Text object (for instance) repeatedly, with
+   * different internal string data each time, is not tested in the same way
+   * that Hadoop's OutputCollector works.
    */
   public void collect(K key, V value) throws IOException {
     collectedOutputs.add(new Pair<K, V>(key, value));
@@ -63,4 +62,3 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
     return collectedOutputs;
   }
 }
-

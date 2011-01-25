@@ -17,7 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +31,13 @@ import org.apache.hadoop.mrunit.types.Pair;
 
 /**
  * Harness that allows you to test a Reducer instance. You provide a key and a
- * set of intermediate values for that key that represent inputs that should
- * be sent to the Reducer (as if they came from a Mapper), and outputs you
- * expect to be sent by the Reducer to the collector. By calling runTest(),
- * the harness will deliver the input to the Reducer and will check its
- * outputs against the expected results. This is designed to handle a single
- * (k, v*) -> (k, v)* case from the Reducer, representing a single unit test.
- * Multiple input (k, v*) sets should go in separate unit tests.
+ * set of intermediate values for that key that represent inputs that should be
+ * sent to the Reducer (as if they came from a Mapper), and outputs you expect
+ * to be sent by the Reducer to the collector. By calling runTest(), the harness
+ * will deliver the input to the Reducer and will check its outputs against the
+ * expected results. This is designed to handle a single (k, v*) -> (k, v)* case
+ * from the Reducer, representing a single unit test. Multiple input (k, v*)
+ * sets should go in separate unit tests.
  */
 @SuppressWarnings("deprecation")
 public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
@@ -61,7 +60,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Sets the reducer object to use for this test
-   *
+   * 
    * @param r
    *          The reducer object to use
    */
@@ -71,7 +70,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to setReducer(), but with fluent programming style
-   *
+   * 
    * @param r
    *          The Reducer to use
    * @return this
@@ -87,7 +86,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Sets the input key to send to the Reducer
-   *
+   * 
    */
   public void setInputKey(K1 key) {
     inputKey = key;
@@ -95,7 +94,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to setInputKey() but with fluent programming style
-   *
+   * 
    * @return this
    */
   public ReduceDriver<K1, V1, K2, V2> withInputKey(K1 key) {
@@ -105,7 +104,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * adds an input value to send to the reducer
-   *
+   * 
    * @param val
    */
   public void addInputValue(V1 val) {
@@ -114,7 +113,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to addInputValue() but with fluent programming style
-   *
+   * 
    * @param val
    * @return this
    */
@@ -125,7 +124,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Sets the input values to send to the reducer; overwrites existing ones
-   *
+   * 
    * @param values
    */
   public void setInputValues(List<V1> values) {
@@ -135,7 +134,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Adds a set of input values to send to the reducer
-   *
+   * 
    * @param values
    */
   public void addInputValues(List<V1> values) {
@@ -144,7 +143,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to addInputValues() but with fluent programming style
-   *
+   * 
    * @param values
    * @return this
    */
@@ -155,7 +154,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Sets the input to send to the reducer
-   *
+   * 
    * @param values
    */
   public void setInput(K1 key, List<V1> values) {
@@ -165,7 +164,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   *
+   * 
    * @return this
    */
   public ReduceDriver<K1, V1, K2, V2> withInput(K1 key, List<V1> values) {
@@ -175,7 +174,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Adds an output (k, v) pair we expect from the Reducer
-   *
+   * 
    * @param outputRecord
    *          The (k, v) pair to add
    */
@@ -189,7 +188,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   *
+   * 
    * @param outputRecord
    * @return this
    */
@@ -200,9 +199,11 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Adds an output (k, v) pair we expect from the Reducer
-   *
-   * @param key The key part of a (k, v) pair to add
-   * @param val The val part of a (k, v) pair to add
+   * 
+   * @param key
+   *          The key part of a (k, v) pair to add
+   * @param val
+   *          The val part of a (k, v) pair to add
    */
   public void addOutput(K2 key, V2 val) {
     addOutput(new Pair<K2, V2>(key, val));
@@ -210,9 +211,11 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   *
-   * @param key The key part of a (k, v) pair to add
-   * @param val The val part of a (k, v) pair to add
+   * 
+   * @param key
+   *          The key part of a (k, v) pair to add
+   * @param val
+   *          The val part of a (k, v) pair to add
    * @return this
    */
   public ReduceDriver<K1, V1, K2, V2> withOutput(K2 key, V2 val) {
@@ -223,13 +226,15 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
   /**
    * Expects an input of the form "key \t val, val, val..." Forces the Reducer
    * input types to Text.
-   *
+   * 
    * @param input
    *          A string of the form "key \t val,val,val". Trims any whitespace.
    */
+  @SuppressWarnings("unchecked")
   public void setInputFromString(String input) {
     if (null == input) {
-      throw new IllegalArgumentException("null input given to setInputFromString");
+      throw new IllegalArgumentException(
+          "null input given to setInputFromString");
     } else {
       Pair<Text, Text> inputPair = parseTabbedPair(input);
       if (null != inputPair) {
@@ -237,7 +242,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
         // this.
         setInputKey((K1) inputPair.getFirst());
         setInputValues((List<V1>) parseCommaDelimitedList(inputPair.getSecond()
-                .toString()));
+            .toString()));
       } else {
         throw new IllegalArgumentException(
             "Could not parse input pair in setInputFromString");
@@ -247,7 +252,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to setInput, but with a fluent programming style
-   *
+   * 
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -260,10 +265,11 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
   /**
    * Expects an input of the form "key \t val" Forces the Reducer output types
    * to Text.
-   *
+   * 
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    */
+  @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
       throw new IllegalArgumentException("null input given to setOutput");
@@ -274,14 +280,15 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
         // this.
         addOutput((Pair<K2, V2>) outputPair);
       } else {
-        throw new IllegalArgumentException("Could not parse output pair in setOutput");
+        throw new IllegalArgumentException(
+            "Could not parse output pair in setOutput");
       }
     }
   }
 
   /**
    * Identical to addOutput, but with a fluent programming style
-   *
+   * 
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -294,12 +301,11 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
 
-    MockOutputCollector<K2, V2> outputCollector =
-      new MockOutputCollector<K2, V2>();
+    MockOutputCollector<K2, V2> outputCollector = new MockOutputCollector<K2, V2>();
     MockReporter reporter = new MockReporter(MockReporter.ReporterType.Reducer);
 
     myReducer.reduce(inputKey, inputValues.iterator(), outputCollector,
-            reporter);
+        reporter);
 
     List<Pair<K2, V2>> outputs = outputCollector.getOutputs();
     return outputs;
@@ -341,4 +347,3 @@ public class ReduceDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
     return "ReduceDriver (" + reducerStr + ")";
   }
 }
-

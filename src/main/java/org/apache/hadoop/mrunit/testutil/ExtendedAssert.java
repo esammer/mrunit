@@ -23,14 +23,18 @@ import static org.junit.Assert.*;
 
 public final class ExtendedAssert {
 
-  private ExtendedAssert() { }
+  private ExtendedAssert() {
+  }
 
   /**
    * Asserts that all the elements of the list are equivalent under equals()
-   * @param expected a list full of expected values
-   * @param actual a list full of actual test values
+   * 
+   * @param expected
+   *          a list full of expected values
+   * @param actual
+   *          a list full of actual test values
    */
-  public static void assertListEquals(List expected, List actual) {
+  public static void assertListEquals(List<?> expected, List<?> actual) {
     if (expected.size() != actual.size()) {
       fail("Expected list of size " + expected.size() + "; actual size is "
           + actual.size());

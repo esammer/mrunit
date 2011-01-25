@@ -17,7 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-
 import java.io.IOException;
 import java.util.List;
 
@@ -30,13 +29,13 @@ import org.apache.hadoop.mrunit.mock.MockReporter;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * Harness that allows you to test a Mapper instance. You provide the input
- * key and value that should be sent to the Mapper, and outputs you expect to
- * be sent by the Mapper to the collector for those inputs. By calling
- * runTest(), the harness will deliver the input to the Mapper and will check
- * its outputs against the expected results. This is designed to handle a
- * single (k, v) -> (k, v)* case from the Mapper, representing a single unit
- * test. Multiple input (k, v) pairs should go in separate unit tests.
+ * Harness that allows you to test a Mapper instance. You provide the input key
+ * and value that should be sent to the Mapper, and outputs you expect to be
+ * sent by the Mapper to the collector for those inputs. By calling runTest(),
+ * the harness will deliver the input to the Mapper and will check its outputs
+ * against the expected results. This is designed to handle a single (k, v) ->
+ * (k, v)* case from the Mapper, representing a single unit test. Multiple input
+ * (k, v) pairs should go in separate unit tests.
  */
 @SuppressWarnings("deprecation")
 public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
@@ -55,11 +54,11 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
   public MapDriver() {
   }
 
-
   /**
    * Set the Mapper instance to use with this test driver
-   *
-   * @param m the Mapper instance to use
+   * 
+   * @param m
+   *          the Mapper instance to use
    */
   public void setMapper(Mapper<K1, V1, K2, V2> m) {
     myMapper = m;
@@ -80,7 +79,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Sets the input key to send to the mapper
-   *
+   * 
    */
   public void setInputKey(K1 key) {
     inputKey = key;
@@ -92,7 +91,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to setInputKey() but with fluent programming style
-   *
+   * 
    * @return this
    */
   public MapDriver<K1, V1, K2, V2> withInputKey(K1 key) {
@@ -102,7 +101,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Sets the input value to send to the mapper
-   *
+   * 
    * @param val
    */
   public void setInputValue(V1 val) {
@@ -115,7 +114,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to setInputValue() but with fluent programming style
-   *
+   * 
    * @param val
    * @return this
    */
@@ -126,7 +125,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Sets the input to send to the mapper
-   *
+   * 
    */
   public void setInput(K1 key, V1 val) {
     setInputKey(key);
@@ -135,7 +134,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   *
+   * 
    * @return this
    */
   public MapDriver<K1, V1, K2, V2> withInput(K1 key, V1 val) {
@@ -145,7 +144,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Sets the input to send to the mapper
-   *
+   * 
    * @param inputRecord
    *          a (key, val) pair
    */
@@ -160,7 +159,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   *
+   * 
    * @param inputRecord
    * @return this
    */
@@ -171,7 +170,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Adds an output (k, v) pair we expect from the Mapper
-   *
+   * 
    * @param outputRecord
    *          The (k, v) pair to add
    */
@@ -185,7 +184,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   *
+   * 
    * @param outputRecord
    * @return this
    */
@@ -196,16 +195,15 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Adds a (k, v) pair we expect as output from the mapper
-   *
+   * 
    */
   public void addOutput(K2 key, V2 val) {
     addOutput(new Pair<K2, V2>(key, val));
   }
 
   /**
-   * Functions like addOutput() but returns self for fluent programming
-   * style
-   *
+   * Functions like addOutput() but returns self for fluent programming style
+   * 
    * @return this
    */
   public MapDriver<K1, V1, K2, V2> withOutput(K2 key, V2 val) {
@@ -214,15 +212,17 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
   }
 
   /**
-   * Expects an input of the form "key \t val" Forces the Mapper input types
-   * to Text.
-   *
+   * Expects an input of the form "key \t val" Forces the Mapper input types to
+   * Text.
+   * 
    * @param input
    *          A string of the form "key \t val".
    */
+  @SuppressWarnings("unchecked")
   public void setInputFromString(String input) {
     if (null == input) {
-      throw new IllegalArgumentException("null input given to setInputFromString");
+      throw new IllegalArgumentException(
+          "null input given to setInputFromString");
     } else {
       Pair<Text, Text> inputPair = parseTabbedPair(input);
       if (null != inputPair) {
@@ -239,7 +239,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   /**
    * Identical to setInputFromString, but with a fluent programming style
-   *
+   * 
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -250,12 +250,13 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
   }
 
   /**
-   * Expects an input of the form "key \t val" Forces the Mapper output types
-   * to Text.
-   *
+   * Expects an input of the form "key \t val" Forces the Mapper output types to
+   * Text.
+   * 
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    */
+  @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
       throw new IllegalArgumentException("null input given to setOutput");
@@ -266,14 +267,15 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
         // this.
         addOutput((Pair<K2, V2>) outputPair);
       } else {
-        throw new IllegalArgumentException("Could not parse output pair in setOutput");
+        throw new IllegalArgumentException(
+            "Could not parse output pair in setOutput");
       }
     }
   }
 
   /**
    * Identical to addOutputFromString, but with a fluent programming style
-   *
+   * 
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -285,8 +287,7 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    MockOutputCollector<K2, V2> outputCollector =
-      new MockOutputCollector<K2, V2>();
+    MockOutputCollector<K2, V2> outputCollector = new MockOutputCollector<K2, V2>();
     MockReporter reporter = new MockReporter(MockReporter.ReporterType.Mapper);
 
     myMapper.map(inputKey, inputVal, outputCollector, reporter);
@@ -326,4 +327,3 @@ public class MapDriver<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
     return "MapDriver (" + myMapper + ")";
   }
 }
-

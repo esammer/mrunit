@@ -17,7 +17,6 @@
  */
 package org.apache.hadoop.mrunit;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,22 +51,25 @@ public abstract class TestDriver<K1, V1, K2, V2> {
   }
 
   /**
-   * Runs the test but returns the result set instead of validating it
-   * (ignores any addOutput(), etc calls made before this)
+   * Runs the test but returns the result set instead of validating it (ignores
+   * any addOutput(), etc calls made before this)
+   * 
    * @return the list of (k, v) pairs returned as output from the test
    */
   public abstract List<Pair<K2, V2>> run() throws IOException;
 
   /**
    * Runs the test and validates the results
+   * 
    * @return void if the tests passed
-   * @throws RuntimeException if they don't
-   * *
+   * @throws RuntimeException
+   *           if they don't *
    */
   public abstract void runTest() throws RuntimeException;
 
   /**
    * Split "key \t val" into Pair(Text(key), Text(val))
+   * 
    * @param tabSeparatedPair
    */
   static Pair<Text, Text> parseTabbedPair(String tabSeparatedPair) {
@@ -91,7 +93,9 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * Split "val,val,val,val..." into a List of Text(val) objects.
-   * @param commaDelimList A list of values separated by commas
+   * 
+   * @param commaDelimList
+   *          A list of values separated by commas
    */
   protected static List<Text> parseCommaDelimitedList(String commaDelimList) {
     ArrayList<Text> outList = new ArrayList<Text>();
@@ -108,8 +112,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     }
 
     while (curPos < len) {
-      outList.add(new Text(
-              commaDelimList.substring(curPos, curComma).trim()));
+      outList.add(new Text(commaDelimList.substring(curPos, curComma).trim()));
       curPos = curComma + 1;
       curComma = commaDelimList.indexOf(',', curPos);
       if (curComma == -1) {
@@ -122,9 +125,12 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * check the outputs against the expected inputs in record
-   * @param outputs The actual output (k, v) pairs from the Mapper
+   * 
+   * @param outputs
+   *          The actual output (k, v) pairs from the Mapper
    * @return void if they all pass
-   * @throws RuntimeException if they don't
+   * @throws RuntimeException
+   *           if they don't
    */
   protected void validate(List<Pair<K2, V2>> outputs) throws RuntimeException {
 
@@ -186,16 +192,19 @@ public abstract class TestDriver<K1, V1, K2, V2> {
 
   /**
    * Part of the validation system.
-   * @param actualVal A (k, v) pair we got from the Mapper
-   * @param actualPos The position of this pair in the actual output
-   * @return true if the expected val at 'actualPos' in the expected
-   *              list equals actualVal
+   * 
+   * @param actualVal
+   *          A (k, v) pair we got from the Mapper
+   * @param actualPos
+   *          The position of this pair in the actual output
+   * @return true if the expected val at 'actualPos' in the expected list equals
+   *         actualVal
    */
   private boolean lookupExpectedValue(Pair<K2, V2> actualVal, int actualPos) {
 
     // first: Do we have the success condition?
     if (expectedOutputs.size() > actualPos
-            && expectedOutputs.get(actualPos).equals(actualVal)) {
+        && expectedOutputs.get(actualPos).equals(actualVal)) {
       LOG.debug("Matched expected output " + actualVal.toString()
           + " at position " + actualPos);
       return true;
@@ -209,9 +218,9 @@ public abstract class TestDriver<K1, V1, K2, V2> {
       Pair<K2, V2> expected = expectedOutputs.get(i);
 
       if (expected.equals(actualVal)) {
-        LOG.error("Matched expected output "
-                + actualVal.toString() + " but at incorrect position "
-                + actualPos + " (expected position " + i + ")");
+        LOG.error("Matched expected output " + actualVal.toString()
+            + " but at incorrect position " + actualPos
+            + " (expected position " + i + ")");
         foundSomewhere = true;
       }
     }
@@ -223,7 +232,7 @@ public abstract class TestDriver<K1, V1, K2, V2> {
     return false;
   }
 
-  protected static void formatValueList(List values, StringBuilder sb) {
+  protected static void formatValueList(List<?> values, StringBuilder sb) {
     sb.append("(");
 
     if (null != values) {

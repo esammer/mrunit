@@ -27,8 +27,7 @@ public class MockReporter implements Reporter {
   private MockInputSplit inputSplit = new MockInputSplit();
 
   public enum ReporterType {
-    Mapper,
-    Reducer
+    Mapper, Reducer
   }
 
   private ReporterType typ;
@@ -41,14 +40,14 @@ public class MockReporter implements Reporter {
   public InputSplit getInputSplit() {
     if (typ == ReporterType.Reducer) {
       throw new UnsupportedOperationException(
-              "Reducer cannot call getInputSplit()");
+          "Reducer cannot call getInputSplit()");
     } else {
       return inputSplit;
     }
   }
 
   @Override
-  public void incrCounter(Enum key, long amount) {
+  public void incrCounter(Enum<?> key, long amount) {
     // do nothing.
   }
 
@@ -74,9 +73,8 @@ public class MockReporter implements Reporter {
   }
 
   @Override
-  public Counter getCounter(Enum key) {
+  public Counter getCounter(Enum<?> key) {
     // do nothing
     return null;
   }
 }
-
