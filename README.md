@@ -32,5 +32,5 @@ I intend to attempt to contribute changes upstream to the ASF.
 
 # Authors #
 
-Aaron Kimball <akimball83@gmail.com>
-E. Sammer <esammer@cloudera.com>
+* Aaron Kimball <akimball83@gmail.com>
+* E. Sammer <esammer@cloudera.com>
