@@ -1,5 +1,4 @@
-Overview
-===
+# Overview #
 
 MRUnit is a unit test driver for MapReduce programs for use with JUnit. See the
 overview in the Javadoc for more details.
@@ -18,8 +17,7 @@ Planned features:
 * Support for testing {Input,Output}Formats.
 * Support for testing Writable serialization of custom types.
 
-Intentions
-==
+# Intentions #
 
 Some members of the Apache Hadoop community feel like the contrib directory is
 not a good long term home for projects like MRUnit. I agree. I would hope (and
