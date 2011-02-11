@@ -21,6 +21,8 @@ package org.apache.hadoop.mrunit.mapreduce.mock;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import java.io.IOException;
+
 /**
  * Mock implementation of InputSplit that does nothing.
  */
@@ -29,7 +31,7 @@ public class MockInputSplit extends FileSplit {
   private static final Path MOCK_PATH = new Path("somefile");
 
   public MockInputSplit() {
-    super(MOCK_PATH, 0, 0, (String[]) null);
+    super(MOCK_PATH, 0, 0, (String []) null);
   }
 
   public String toString() {
@@ -43,3 +45,4 @@ public class MockInputSplit extends FileSplit {
     return MOCK_PATH;
   }
 }
+

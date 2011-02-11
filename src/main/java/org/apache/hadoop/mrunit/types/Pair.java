@@ -19,6 +19,7 @@ package org.apache.hadoop.mrunit.types;
 
 import java.util.Comparator;
 
+
 /**
  * A very basic pair type.
  */
@@ -32,20 +33,14 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
     second = cdr;
   }
 
-  public S getFirst() {
-    return first;
-  }
-
-  public T getSecond() {
-    return second;
-  }
+  public S getFirst() { return first; }
+  public T getSecond() { return second; }
 
   @Override
   public boolean equals(Object o) {
     if (null == o) {
       return false;
     } else if (o instanceof Pair) {
-      @SuppressWarnings("unchecked")
       Pair<S, T> p = (Pair<S, T>) o;
       if (first == null && second == null) {
         return p.first == null && p.second == null;
@@ -76,7 +71,6 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
     return code;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public int compareTo(Pair<S, T> p) {
     if (null == p) {
@@ -99,7 +93,6 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
     public FirstElemComparator() {
     }
 
-    @SuppressWarnings("unchecked")
     public int compare(Pair<S, T> p1, Pair<S, T> p2) {
       Comparable<S> cS = (Comparable<S>) p1.first;
       return cS.compareTo(p2.first);
@@ -110,7 +103,6 @@ public class Pair<S, T> implements Comparable<Pair<S, T>> {
     public SecondElemComparator() {
     }
 
-    @SuppressWarnings("unchecked")
     public int compare(Pair<S, T> p1, Pair<S, T> p2) {
       Comparable<T> cT = (Comparable<T>) p1.second;
       return cT.compareTo(p2.second);

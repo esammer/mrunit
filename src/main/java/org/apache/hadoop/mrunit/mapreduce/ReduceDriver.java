@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mrunit.ReduceDriverBase;
@@ -33,16 +35,15 @@ import org.apache.hadoop.mrunit.types.Pair;
 
 /**
  * Harness that allows you to test a Reducer instance. You provide a key and a
- * set of intermediate values for that key that represent inputs that should be
- * sent to the Reducer (as if they came from a Mapper), and outputs you expect
- * to be sent by the Reducer to the collector. By calling runTest(), the harness
- * will deliver the input to the Reducer and will check its outputs against the
- * expected results. This is designed to handle a single (k, v*) -> (k, v)* case
- * from the Reducer, representing a single unit test. Multiple input (k, v*)
- * sets should go in separate unit tests.
+ * set of intermediate values for that key that represent inputs that should
+ * be sent to the Reducer (as if they came from a Mapper), and outputs you
+ * expect to be sent by the Reducer to the collector. By calling runTest(),
+ * the harness will deliver the input to the Reducer and will check its
+ * outputs against the expected results. This is designed to handle a single
+ * (k, v*) -> (k, v)* case from the Reducer, representing a single unit test.
+ * Multiple input (k, v*) sets should go in separate unit tests.
  */
-public class ReduceDriver<K1, V1, K2, V2> extends
-    ReduceDriverBase<K1, V1, K2, V2> {
+public class ReduceDriver<K1, V1, K2, V2> extends ReduceDriverBase<K1, V1, K2, V2> {
 
   public static final Log LOG = LogFactory.getLog(ReduceDriver.class);
 
@@ -60,7 +61,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Sets the reducer object to use for this test
-   * 
+   *
    * @param r
    *          The reducer object to use
    */
@@ -70,7 +71,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to setReducer(), but with fluent programming style
-   * 
+   *
    * @param r
    *          The Reducer to use
    * @return this
@@ -89,11 +90,8 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return counters;
   }
 
-  /**
-   * Sets the counters object to use for this test.
-   * 
-   * @param ctrs
-   *          The counters object to use.
+  /** Sets the counters object to use for this test.
+   * @param ctrs The counters object to use.
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
@@ -107,7 +105,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to setInputKey() but with fluent programming style
-   * 
+   *
    * @return this
    */
   public ReduceDriver<K1, V1, K2, V2> withInputKey(K1 key) {
@@ -117,7 +115,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addInputValue() but with fluent programming style
-   * 
+   *
    * @param val
    * @return this
    */
@@ -128,7 +126,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addInputValues() but with fluent programming style
-   * 
+   *
    * @param values
    * @return this
    */
@@ -139,7 +137,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   * 
+   *
    * @return this
    */
   public ReduceDriver<K1, V1, K2, V2> withInput(K1 key, List<V1> values) {
@@ -149,7 +147,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   * 
+   *
    * @param outputRecord
    * @return this
    */
@@ -160,11 +158,9 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   * 
-   * @param key
-   *          The key part of a (k, v) pair to add
-   * @param val
-   *          The val part of a (k, v) pair to add
+   *
+   * @param key The key part of a (k, v) pair to add
+   * @param val The val part of a (k, v) pair to add
    * @return this
    */
   public ReduceDriver<K1, V1, K2, V2> withOutput(K2 key, V2 val) {
@@ -174,7 +170,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to setInput, but with a fluent programming style
-   * 
+   *
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -186,7 +182,7 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addOutput, but with a fluent programming style
-   * 
+   *
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -202,9 +198,9 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     inputs.add(new Pair<K1, List<V1>>(inputKey, inputValues));
 
     try {
-      MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>();
-      MockReduceContextWrapper<K1, V1, K2, V2>.MockReduceContext context = wrapper
-          .getMockContext(configuration, inputs, getCounters());
+      MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper();
+      MockReduceContextWrapper<K1, V1, K2, V2>.MockReduceContext context =
+          wrapper.getMockContext(configuration, inputs, getCounters());
 
       myReducer.run(context);
       return context.getOutputs();
@@ -217,11 +213,10 @@ public class ReduceDriver<K1, V1, K2, V2> extends
   public String toString() {
     return "ReduceDriver (0.20+) (" + myReducer + ")";
   }
-
-  /**
-   * @param configuration
-   *          The configuration object that will given to the reducer associated
-   *          with the driver
+  
+  /** 
+   * @param configuration The configuration object that will given to the 
+   *        reducer associated with the driver
    * @return this object for fluent coding
    */
   public ReduceDriver<K1, V1, K2, V2> withConfiguration(
@@ -230,3 +225,4 @@ public class ReduceDriver<K1, V1, K2, V2> extends
     return this;
   }
 }
+

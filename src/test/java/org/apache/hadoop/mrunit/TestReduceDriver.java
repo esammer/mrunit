@@ -19,6 +19,7 @@ package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -37,7 +38,6 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
 public class TestReduceDriver extends TestCase {
 
   private static final int IN_A = 4;
@@ -52,7 +52,8 @@ public class TestReduceDriver extends TestCase {
   @Before
   public void setUp() throws Exception {
     reducer = new LongSumReducer<Text>();
-    driver = new ReduceDriver<Text, LongWritable, Text, LongWritable>(reducer);
+    driver = new ReduceDriver<Text, LongWritable, Text, LongWritable>(
+                   reducer);
   }
 
   @Test
@@ -61,15 +62,17 @@ public class TestReduceDriver extends TestCase {
 
     try {
       out = driver.withInputKey(new Text("foo"))
-          .withInputValue(new LongWritable(IN_A))
-          .withInputValue(new LongWritable(IN_B)).run();
+                  .withInputValue(new LongWritable(IN_A))
+                  .withInputValue(new LongWritable(IN_B))
+                  .run();
     } catch (IOException ioe) {
       fail();
     }
 
-    List<Pair<Text, LongWritable>> expected = new ArrayList<Pair<Text, LongWritable>>();
+    List<Pair<Text, LongWritable>> expected =
+        new ArrayList<Pair<Text, LongWritable>>();
     expected.add(new Pair<Text, LongWritable>(new Text("foo"),
-        new LongWritable(OUT_VAL)));
+            new LongWritable(OUT_VAL)));
 
     assertListEquals(out, expected);
 
@@ -77,24 +80,31 @@ public class TestReduceDriver extends TestCase {
 
   @Test
   public void testTestRun1() {
-    driver.withInputKey(new Text("foo"))
-        .withOutput(new Text("foo"), new LongWritable(0)).runTest();
+    driver
+            .withInputKey(new Text("foo"))
+            .withOutput(new Text("foo"), new LongWritable(0))
+            .runTest();
   }
 
   @Test
   public void testTestRun2() {
-    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
-        .withInputValue(new LongWritable(IN_B))
-        .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest();
+    driver
+            .withInputKey(new Text("foo"))
+            .withInputValue(new LongWritable(IN_A))
+            .withInputValue(new LongWritable(IN_B))
+            .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+            .runTest();
   }
 
   @Test
   public void testTestRun3() {
     try {
-      driver.withInputKey(new Text("foo"))
-          .withInputValue(new LongWritable(IN_A))
-          .withInputValue(new LongWritable(IN_B))
-          .withOutput(new Text("bar"), new LongWritable(OUT_VAL)).runTest();
+      driver
+            .withInputKey(new Text("foo"))
+            .withInputValue(new LongWritable(IN_A))
+            .withInputValue(new LongWritable(IN_B))
+            .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -105,11 +115,12 @@ public class TestReduceDriver extends TestCase {
   @Test
   public void testTestRun4() {
     try {
-      driver.withInputKey(new Text("foo"))
-          .withInputValue(new LongWritable(IN_A))
-          .withInputValue(new LongWritable(IN_B))
-          .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT))
-          .runTest();
+      driver
+            .withInputKey(new Text("foo"))
+            .withInputValue(new LongWritable(IN_A))
+            .withInputValue(new LongWritable(IN_B))
+            .withOutput(new Text("foo"), new LongWritable(INCORRECT_OUT))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -119,10 +130,12 @@ public class TestReduceDriver extends TestCase {
   @Test
   public void testTestRun5() {
     try {
-      driver.withInputKey(new Text("foo"))
-          .withInputValue(new LongWritable(IN_A))
-          .withInputValue(new LongWritable(IN_B))
-          .withOutput(new Text("foo"), new LongWritable(IN_A)).runTest();
+      driver
+            .withInputKey(new Text("foo"))
+            .withInputValue(new LongWritable(IN_A))
+            .withInputValue(new LongWritable(IN_B))
+            .withOutput(new Text("foo"), new LongWritable(IN_A))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -132,11 +145,13 @@ public class TestReduceDriver extends TestCase {
   @Test
   public void testTestRun6() {
     try {
-      driver.withInputKey(new Text("foo"))
-          .withInputValue(new LongWritable(IN_A))
-          .withInputValue(new LongWritable(IN_B))
-          .withOutput(new Text("foo"), new LongWritable(IN_A))
-          .withOutput(new Text("foo"), new LongWritable(IN_B)).runTest();
+      driver
+            .withInputKey(new Text("foo"))
+            .withInputValue(new LongWritable(IN_A))
+            .withInputValue(new LongWritable(IN_B))
+            .withOutput(new Text("foo"), new LongWritable(IN_A))
+            .withOutput(new Text("foo"), new LongWritable(IN_B))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -146,11 +161,13 @@ public class TestReduceDriver extends TestCase {
   @Test
   public void testTestRun7() {
     try {
-      driver.withInputKey(new Text("foo"))
-          .withInputValue(new LongWritable(IN_A))
-          .withInputValue(new LongWritable(IN_B))
-          .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
-          .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest();
+      driver
+              .withInputKey(new Text("foo"))
+              .withInputValue(new LongWritable(IN_A))
+              .withInputValue(new LongWritable(IN_B))
+              .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+              .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+              .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -160,12 +177,14 @@ public class TestReduceDriver extends TestCase {
   @Test
   public void testTestRun8() {
     try {
-      driver.withInputKey(new Text("foo"))
-          .withInputValue(new LongWritable(IN_A))
-          .withInputValue(new LongWritable(IN_B))
-          .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
-          .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest();
-      fail();
+      driver
+            .withInputKey(new Text("foo"))
+            .withInputValue(new LongWritable(IN_A))
+            .withInputValue(new LongWritable(IN_B))
+            .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
+            .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+            .runTest();
+            fail();
     } catch (RuntimeException re) {
       // expected.
     }
@@ -174,11 +193,13 @@ public class TestReduceDriver extends TestCase {
   @Test
   public void testTestRun9() {
     try {
-      driver.withInputKey(new Text("foo"))
-          .withInputValue(new LongWritable(IN_A))
-          .withInputValue(new LongWritable(IN_B))
-          .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
-          .withOutput(new Text("bar"), new LongWritable(OUT_VAL)).runTest();
+      driver
+            .withInputKey(new Text("foo"))
+            .withInputValue(new LongWritable(IN_A))
+            .withInputValue(new LongWritable(IN_B))
+            .withOutput(new Text("foo"), new LongWritable(OUT_VAL))
+            .withOutput(new Text("bar"), new LongWritable(OUT_VAL))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -189,7 +210,9 @@ public class TestReduceDriver extends TestCase {
   public void testEmptyInput() {
     // (null, <empty>) will be forcibly fed as input
     // since we use LongSumReducer, expect (null, 0) out.
-    driver.withOutput(null, new LongWritable(OUT_EMPTY)).runTest();
+    driver
+            .withOutput(null, new LongWritable(OUT_EMPTY))
+            .runTest();
   }
 
   @Test
@@ -205,11 +228,11 @@ public class TestReduceDriver extends TestCase {
   }
 
   /**
-   * Reducer that counts its values twice; the second iteration according to
-   * mapreduce semantics should be empty.
+   * Reducer that counts its values twice; the second iteration
+   * according to mapreduce semantics should be empty.
    */
-  private static class DoubleIterReducer<K, V> extends MapReduceBase implements
-      Reducer<K, V, K, LongWritable> {
+  private static class DoubleIterReducer<K, V>
+      extends MapReduceBase implements Reducer<K, V, K, LongWritable> {
     public void reduce(K key, Iterator<V> values,
         OutputCollector<K, LongWritable> out, Reporter r) throws IOException {
       long count = 0;
@@ -231,12 +254,17 @@ public class TestReduceDriver extends TestCase {
   @Test
   public void testDoubleIteration() {
     reducer = new DoubleIterReducer<Text, LongWritable>();
-    driver = new ReduceDriver<Text, LongWritable, Text, LongWritable>(reducer);
+    driver = new ReduceDriver<Text, LongWritable, Text, LongWritable>(
+        reducer);
 
-    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(1))
+    driver
+        .withInputKey(new Text("foo"))
         .withInputValue(new LongWritable(1))
         .withInputValue(new LongWritable(1))
         .withInputValue(new LongWritable(1))
-        .withOutput(new Text("foo"), new LongWritable(4)).runTest();
+        .withInputValue(new LongWritable(1))
+        .withOutput(new Text("foo"), new LongWritable(4))
+        .runTest();
   }
 }
+

@@ -19,8 +19,10 @@ package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -41,7 +43,6 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
 public class TestMapReduceDriver extends TestCase {
 
   private static final int FOO_IN_A = 42;
@@ -51,7 +52,9 @@ public class TestMapReduceDriver extends TestCase {
 
   private Mapper<Text, LongWritable, Text, LongWritable> mapper;
   private Reducer<Text, LongWritable, Text, LongWritable> reducer;
-  private MapReduceDriver<Text, LongWritable, Text, LongWritable, Text, LongWritable> driver;
+  private MapReduceDriver<Text, LongWritable,
+                  Text, LongWritable,
+                  Text, LongWritable> driver;
 
   private MapReduceDriver<Text, Text, Text, Text, Text, Text> driver2;
 
@@ -59,8 +62,10 @@ public class TestMapReduceDriver extends TestCase {
   public void setUp() throws Exception {
     mapper = new IdentityMapper<Text, LongWritable>();
     reducer = new LongSumReducer<Text>();
-    driver = new MapReduceDriver<Text, LongWritable, Text, LongWritable, Text, LongWritable>(
-        mapper, reducer);
+    driver = new MapReduceDriver<Text, LongWritable,
+                                 Text, LongWritable,
+                                 Text, LongWritable>(
+                        mapper, reducer);
     // for shuffle tests
     driver2 = new MapReduceDriver<Text, Text, Text, Text, Text, Text>();
   }
@@ -69,48 +74,57 @@ public class TestMapReduceDriver extends TestCase {
   public void testRun() {
     List<Pair<Text, LongWritable>> out = null;
     try {
-      out = driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-          .withInput(new Text("bar"), new LongWritable(BAR_IN)).run();
+      out = driver
+              .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+              .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+              .withInput(new Text("bar"), new LongWritable(BAR_IN))
+              .run();
     } catch (IOException ioe) {
       fail();
     }
 
-    List<Pair<Text, LongWritable>> expected = new ArrayList<Pair<Text, LongWritable>>();
+    List<Pair<Text, LongWritable>> expected =
+      new ArrayList<Pair<Text, LongWritable>>();
     expected.add(new Pair<Text, LongWritable>(new Text("bar"),
-        new LongWritable(BAR_IN)));
+            new LongWritable(BAR_IN)));
     expected.add(new Pair<Text, LongWritable>(new Text("foo"),
-        new LongWritable(FOO_OUT)));
+            new LongWritable(FOO_OUT)));
 
     assertListEquals(out, expected);
   }
 
   @Test
   public void testTestRun1() {
-    driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-        .withInput(new Text("bar"), new LongWritable(BAR_IN))
-        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+    driver
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+            .withInput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+            .runTest();
   }
 
   @Test
   public void testTestRun2() {
-    driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-        .withInput(new Text("bar"), new LongWritable(BAR_IN))
-        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+    driver
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+            .withInput(new Text("bar"), new LongWritable(BAR_IN))
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+            .runTest();
   }
 
   @Test
   public void testTestRun3() {
     try {
-      driver.withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-          .withInput(new Text("bar"), new LongWritable(BAR_IN))
-          .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-          .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
-          .withOutput(new Text("bar"), new LongWritable(BAR_IN)).runTest();
+      driver
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+            .withInput(new Text("bar"), new LongWritable(BAR_IN))
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected
@@ -125,7 +139,9 @@ public class TestMapReduceDriver extends TestCase {
   @Test
   public void testEmptyInputWithOutputFails() {
     try {
-      driver.withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+      driver
+              .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+              .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -198,6 +214,7 @@ public class TestMapReduceDriver extends TestCase {
     assertListEquals(expected, outputs);
   }
 
+
   // shuffle multiple keys that are out-of-order to start.
   @Test
   public void testMultiShuffle2() {
@@ -226,71 +243,77 @@ public class TestMapReduceDriver extends TestCase {
   // Test "combining" with an IdentityReducer. Result should be the same.
   @Test
   public void testIdentityCombiner() {
-    driver.withCombiner(new IdentityReducer<Text, LongWritable>())
-        .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-        .withInput(new Text("bar"), new LongWritable(BAR_IN))
-        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+    driver
+            .withCombiner(new IdentityReducer<Text, LongWritable>())
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+            .withInput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+            .runTest();
   }
 
   // Test "combining" with another LongSumReducer. Result should be the same.
   @Test
   public void testLongSumCombiner() {
-    driver.withCombiner(new LongSumReducer<Text>())
-        .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-        .withInput(new Text("bar"), new LongWritable(BAR_IN))
-        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+    driver
+            .withCombiner(new LongSumReducer<Text>())
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+            .withInput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+            .runTest();
   }
 
   // Test "combining" with another LongSumReducer, and with the Reducer
   // set to IdentityReducer. Result should be the same.
   @Test
   public void testLongSumCombinerAndIdentityReduce() {
-    driver.withCombiner(new LongSumReducer<Text>())
-        .withReducer(new IdentityReducer<Text, LongWritable>())
-        .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
-        .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
-        .withInput(new Text("bar"), new LongWritable(BAR_IN))
-        .withOutput(new Text("bar"), new LongWritable(BAR_IN))
-        .withOutput(new Text("foo"), new LongWritable(FOO_OUT)).runTest();
+    driver
+            .withCombiner(new LongSumReducer<Text>())
+            .withReducer(new IdentityReducer<Text, LongWritable>())
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_A))
+            .withInput(new Text("foo"), new LongWritable(FOO_IN_B))
+            .withInput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("bar"), new LongWritable(BAR_IN))
+            .withOutput(new Text("foo"), new LongWritable(FOO_OUT))
+            .runTest();
   }
-
+  
   // Test the key grouping and value ordering comparators
   @Test
   public void testComparators() {
     // group comparator - group by first character
-    RawComparator<Text> groupComparator = new RawComparator<Text>() {
+    RawComparator groupComparator = new RawComparator() {
       @Override
-      public int compare(Text o1, Text o2) {
-        return o1.toString().substring(0, 1)
-            .compareTo(o2.toString().substring(0, 1));
+      public int compare(Object o1, Object o2) {
+        return o1.toString().substring(0, 1).compareTo(
+            o2.toString().substring(0, 1));
       }
 
       @Override
       public int compare(byte[] arg0, int arg1, int arg2, byte[] arg3,
           int arg4, int arg5) {
         throw new RuntimeException("Not implemented");
-      }
+      }  
     };
-
+    
     // value order comparator - order by second character
-    RawComparator<Text> orderComparator = new RawComparator<Text>() {
+    RawComparator orderComparator = new RawComparator() {
       @Override
-      public int compare(Text o1, Text o2) {
-        return o1.toString().substring(1, 2)
-            .compareTo(o2.toString().substring(1, 2));
+      public int compare(Object o1, Object o2) {
+        return o1.toString().substring(1, 2).compareTo(
+            o2.toString().substring(1, 2));
       }
-
+      
       @Override
       public int compare(byte[] arg0, int arg1, int arg2, byte[] arg3,
           int arg4, int arg5) {
         throw new RuntimeException("Not implemented");
       }
     };
-
+    
     // reducer to track the order of the input values using bit shifting
     driver.withReducer(new Reducer<Text, LongWritable, Text, LongWritable>() {
       @Override
@@ -300,33 +323,31 @@ public class TestMapReduceDriver extends TestCase {
         long outputValue = 0;
         int count = 0;
         while (values.hasNext()) {
-          outputValue |= (values.next().get() << (count++ * 8));
+          outputValue |= (values.next().get() << (count++*8));
         }
-
+        
         output.collect(key, new LongWritable(outputValue));
       }
 
       @Override
-      public void configure(JobConf job) {
-      }
+      public void configure(JobConf job) {}
 
       @Override
-      public void close() throws IOException {
-      }
+      public void close() throws IOException {}
     });
-
+    
     driver.withKeyGroupingComparator(groupComparator);
     driver.withKeyOrderComparator(orderComparator);
-
+    
     driver.addInput(new Text("a1"), new LongWritable(1));
     driver.addInput(new Text("b1"), new LongWritable(1));
     driver.addInput(new Text("a3"), new LongWritable(3));
     driver.addInput(new Text("a2"), new LongWritable(2));
-
-    driver.addOutput(new Text("a1"), new LongWritable(0x1 | (0x2 << 8)
-        | (0x3 << 16)));
+    
+    driver.addOutput(new Text("a1"), new LongWritable(0x1 | (0x2 << 8) | (0x3 << 16)));
     driver.addOutput(new Text("b1"), new LongWritable(0x1));
-
+    
     driver.runTest();
   }
 }
+

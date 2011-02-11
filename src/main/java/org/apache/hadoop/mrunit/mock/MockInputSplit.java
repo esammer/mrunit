@@ -29,13 +29,12 @@ import org.apache.hadoop.mapred.InputSplit;
  * A fake InputSplit object to be returned by our MockReporter to the user
  * class.
  */
-@SuppressWarnings("deprecation")
 public class MockInputSplit extends FileSplit implements InputSplit {
 
   private static final Path MOCK_PATH = new Path("somefile");
 
   public MockInputSplit() {
-    super(MOCK_PATH, 0, 0, (String[]) null);
+    super(MOCK_PATH, 0, 0, (String []) null);
   }
 
   @Override
@@ -60,6 +59,7 @@ public class MockInputSplit extends FileSplit implements InputSplit {
     return "MockInputSplit";
   }
 
+
   /**
    * Return the path object represented by this as a FileSplit.
    */
@@ -67,3 +67,4 @@ public class MockInputSplit extends FileSplit implements InputSplit {
     return MOCK_PATH;
   }
 }
+

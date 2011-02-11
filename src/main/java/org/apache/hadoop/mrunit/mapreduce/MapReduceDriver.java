@@ -17,14 +17,21 @@
  */
 package org.apache.hadoop.mrunit.mapreduce;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.RawComparator;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -32,16 +39,16 @@ import org.apache.hadoop.mrunit.MapReduceDriverBase;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * Harness that allows you to test a Mapper and a Reducer instance together You
- * provide the input key and value that should be sent to the Mapper, and
+ * Harness that allows you to test a Mapper and a Reducer instance together
+ * You provide the input key and value that should be sent to the Mapper, and
  * outputs you expect to be sent by the Reducer to the collector for those
  * inputs. By calling runTest(), the harness will deliver the input to the
- * Mapper, feed the intermediate results to the Reducer (without checking them),
- * and will check the Reducer's outputs against the expected results. This is
- * designed to handle a single (k, v)* -> (k, v)* case from the Mapper/Reducer
- * pair, representing a single unit test.
+ * Mapper, feed the intermediate results to the Reducer (without checking
+ * them), and will check the Reducer's outputs against the expected results.
+ * This is designed to handle a single (k, v)* -> (k, v)* case from the
+ * Mapper/Reducer pair, representing a single unit test.
  */
-public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, V3>
+public class MapReduceDriver<K1, V1, K2 extends Comparable, V2, K3, V3>
     extends MapReduceDriverBase<K1, V1, K2, V2, K3, V3> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriver.class);
@@ -51,7 +58,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
   private Counters counters;
 
   public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
-      final Reducer<K2, V2, K3, V3> r) {
+                         final Reducer<K2, V2, K3, V3> r) {
     myMapper = m;
     myReducer = r;
     counters = new Counters();
@@ -61,19 +68,15 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
     counters = new Counters();
   }
 
-  /**
-   * Set the Mapper instance to use with this test driver
-   * 
-   * @param m
-   *          the Mapper instance to use
-   */
+  /** Set the Mapper instance to use with this test driver
+   * @param m the Mapper instance to use */
   public void setMapper(Mapper<K1, V1, K2, V2> m) {
     myMapper = m;
   }
 
   /** Sets the Mapper instance to use and returns self for fluent style */
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withMapper(
-      Mapper<K1, V1, K2, V2> m) {
+          Mapper<K1, V1, K2, V2> m) {
     setMapper(m);
     return this;
   }
@@ -87,9 +90,7 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
 
   /**
    * Sets the reducer object to use for this test
-   * 
-   * @param r
-   *          The reducer object to use
+   * @param r The reducer object to use
    */
   public void setReducer(Reducer<K2, V2, K3, V3> r) {
     myReducer = r;
@@ -97,13 +98,11 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
 
   /**
    * Identical to setReducer(), but with fluent programming style
-   * 
-   * @param r
-   *          The Reducer to use
+   * @param r The Reducer to use
    * @return this
    */
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withReducer(
-      Reducer<K2, V2, K3, V3> r) {
+          Reducer<K2, V2, K3, V3> r) {
     setReducer(r);
     return this;
   }
@@ -120,26 +119,21 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
     return counters;
   }
 
-  /**
-   * Sets the counters object to use for this test.
-   * 
-   * @param ctrs
-   *          The counters object to use.
+  /** Sets the counters object to use for this test.
+   * @param ctrs The counters object to use.
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
   }
 
   /** Sets the counters to use and returns self for fluent style */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounters(
-      final Counters ctrs) {
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounters(final Counters ctrs) {
     setCounters(ctrs);
     return this;
   }
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   * 
    * @param key
    * @param val
    * @return this
@@ -151,31 +145,28 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   * 
-   * @param input
-   *          The (k, v) pair to add
+   * @param input The (k, v) pair to add
    * @return this
    */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInput(Pair<K1, V1> input) {
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInput(
+      Pair<K1, V1> input) {
     addInput(input);
     return this;
   }
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   * 
    * @param outputRecord
    * @return this
    */
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutput(
-      Pair<K3, V3> outputRecord) {
+          Pair<K3, V3> outputRecord) {
     addOutput(outputRecord);
     return this;
   }
 
   /**
    * Functions like addOutput() but returns self for fluent programming style
-   * 
    * @param key
    * @param val
    * @return this
@@ -187,26 +178,20 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
 
   /**
    * Identical to addInputFromString, but with a fluent programming style
-   * 
-   * @param input
-   *          A string of the form "key \t val". Trims any whitespace.
+   * @param input A string of the form "key \t val". Trims any whitespace.
    * @return this
    */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInputFromString(
-      String input) {
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withInputFromString(String input) {
     addInputFromString(input);
     return this;
   }
 
   /**
    * Identical to addOutputFromString, but with a fluent programming style
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
+   * @param output A string of the form "key \t val". Trims any whitespace.
    * @return this
    */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputFromString(
-      String output) {
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withOutputFromString(String output) {
     addOutputFromString(output);
     return this;
   }
@@ -219,9 +204,8 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
     for (Pair<K1, V1> input : inputList) {
       LOG.debug("Mapping input " + input.toString() + ")");
 
-      mapOutputs.addAll(new MapDriver<K1, V1, K2, V2>(myMapper)
-          .withInput(input).withCounters(getCounters())
-          .withConfiguration(configuration).run());
+      mapOutputs.addAll(new MapDriver<K1, V1, K2, V2>(myMapper).withInput(
+              input).withCounters(getCounters()).withConfiguration(configuration).run());
     }
 
     List<Pair<K2, List<V2>>> reduceInputs = shuffle(mapOutputs);
@@ -232,12 +216,12 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
       List<V2> inputValues = input.getSecond();
       StringBuilder sb = new StringBuilder();
       formatValueList(inputValues, sb);
-      LOG.debug("Reducing input (" + inputKey.toString() + ", " + sb.toString()
-          + ")");
+      LOG.debug("Reducing input (" + inputKey.toString() + ", "
+          + sb.toString() + ")");
 
       reduceOutputs.addAll(new ReduceDriver<K2, V2, K3, V3>(myReducer)
-          .withCounters(getCounters()).withConfiguration(configuration)
-          .withInputKey(inputKey).withInputValues(inputValues).run());
+              .withCounters(getCounters()).withConfiguration(configuration)
+              .withInputKey(inputKey).withInputValues(inputValues).run());
     }
 
     return reduceOutputs;
@@ -247,11 +231,10 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
   public String toString() {
     return "MapReduceDriver (0.20+) (" + myMapper + ", " + myReducer + ")";
   }
-
-  /**
-   * @param configuration
-   *          The configuration object that will given to the mapper and reducer
-   *          associated with the driver
+  
+  /** 
+   * @param configuration The configuration object that will given to the 
+   *        mapper and reducer associated with the driver
    * @return this driver object for fluent coding
    */
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withConfiguration(
@@ -259,13 +242,12 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
     setConfiguration(configuration);
     return this;
   }
-
+  
   /**
-   * Identical to {@link #setKeyGroupingComparator(RawComparator)}, but with a
-   * fluent programming style
-   * 
-   * @param groupingComparator
-   *          Comparator to use in the shuffle stage for key grouping
+   * Identical to {@link #setKeyGroupingComparator(RawComparator)}, but with a 
+   * fluent programming style 
+   * @param groupingComparator Comparator to use in the shuffle stage for key 
+   * grouping 
    * @return this
    */
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withKeyGroupingComparator(
@@ -273,13 +255,12 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
     setKeyGroupingComparator(groupingComparator);
     return this;
   }
-
+  
   /**
-   * Identical to {@link #setKeyOrderComparator(RawComparator)}, but with a
-   * fluent programming style
-   * 
-   * @param orderComparator
-   *          Comparator to use in the shuffle stage for key value ordering
+   * Identical to {@link #setKeyOrderComparator(RawComparator)}, but with a 
+   * fluent programming style 
+   * @param orderComparator Comparator to use in the shuffle stage for key 
+   * value ordering 
    * @return this
    */
   public MapReduceDriver<K1, V1, K2, V2, K3, V3> withKeyOrderComparator(

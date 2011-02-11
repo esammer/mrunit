@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.mrunit.mock;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +32,11 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.apache.hadoop.util.ReflectionUtils;
 
+
 /**
- * OutputCollector to use in the test framework for Mapper and Reducer classes.
- * Accepts a set of output (k, v) pairs and returns them to the framework for
- * validation.
+ * OutputCollector to use in the test framework for Mapper and Reducer
+ * classes. Accepts a set of output (k, v) pairs and returns them to the
+ * framework for validation.
  */
 public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
 
@@ -43,6 +45,7 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
   private DataOutputBuffer outBuffer;
   private DataInputBuffer inBuffer;
   private Configuration conf;
+
 
   public MockOutputCollector() {
     collectedOutputs = new ArrayList<Pair<K, V>>();
@@ -54,20 +57,22 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
     serializationFactory = new SerializationFactory(conf);
   }
 
-  private Object getInstance(Class<?> klazz) {
+
+  private Object getInstance(Class klazz) {
     return ReflectionUtils.newInstance(klazz, conf);
   }
 
-  private <T> T deepCopy(T obj) throws IOException {
+
+  private Object deepCopy(Object obj) throws IOException {
 
     if (null == obj) {
       return null;
     }
 
-    Class<? extends Object> klazz = obj.getClass();
+    Class klazz = obj.getClass();
     Object out = getInstance(klazz); // the output object to return.
-    Serializer<? extends Object> s = serializationFactory.getSerializer(klazz);
-    Deserializer<? extends Object> ds = serializationFactory.getDeserializer(klazz);
+    Serializer s = serializationFactory.getSerializer(klazz);
+    Deserializer ds = serializationFactory.getDeserializer(klazz);
 
     try {
       s.open(outBuffer);
@@ -76,7 +81,7 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
       outBuffer.reset();
       s.serialize(obj);
 
-      byte[] data = outBuffer.getData();
+      byte [] data = outBuffer.getData();
       int len = outBuffer.getLength();
       inBuffer.reset(data, len);
 
@@ -102,8 +107,7 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
    * Accepts another (key, value) pair as an output of this mapper/reducer.
    */
   public void collect(K key, V value) throws IOException {
-    collectedOutputs
-        .add(new Pair<K, V>((K) deepCopy(key), (V) deepCopy(value)));
+    collectedOutputs.add(new Pair<K, V>((K) deepCopy(key), (V) deepCopy(value)));
   }
 
   /**
@@ -113,3 +117,4 @@ public class MockOutputCollector<K, V> implements OutputCollector<K, V> {
     return collectedOutputs;
   }
 }
+

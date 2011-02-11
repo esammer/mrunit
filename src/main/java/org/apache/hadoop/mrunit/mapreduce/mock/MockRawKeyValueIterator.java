@@ -19,8 +19,10 @@
 package org.apache.hadoop.mrunit.mapreduce.mock;
 
 import org.apache.hadoop.io.DataInputBuffer;
-import org.apache.hadoop.mapred.RawKeyValueIterator;
 import org.apache.hadoop.util.Progress;
+import org.apache.hadoop.mapred.RawKeyValueIterator;
+
+import java.io.IOException;
 
 /**
  * Mock implementation of RawKeyValueIterator that does nothing.
@@ -45,3 +47,4 @@ public class MockRawKeyValueIterator implements RawKeyValueIterator {
     return null;
   }
 }
+

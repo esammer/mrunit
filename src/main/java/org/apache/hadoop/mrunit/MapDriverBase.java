@@ -17,34 +17,37 @@
  */
 package org.apache.hadoop.mrunit;
 
+
 import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mrunit.mock.MockOutputCollector;
+import org.apache.hadoop.mrunit.mock.MockReporter;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * Harness that allows you to test a Mapper instance. You provide the input key
- * and value that should be sent to the Mapper, and outputs you expect to be
- * sent by the Mapper to the collector for those inputs. By calling runTest(),
- * the harness will deliver the input to the Mapper and will check its outputs
- * against the expected results. This is designed to handle a single (k, v) ->
- * (k, v)* case from the Mapper, representing a single unit test. Multiple input
- * (k, v) pairs should go in separate unit tests.
+ * Harness that allows you to test a Mapper instance. You provide the input
+ * key and value that should be sent to the Mapper, and outputs you expect to
+ * be sent by the Mapper to the collector for those inputs. By calling
+ * runTest(), the harness will deliver the input to the Mapper and will check
+ * its outputs against the expected results. This is designed to handle a
+ * single (k, v) -> (k, v)* case from the Mapper, representing a single unit
+ * test. Multiple input (k, v) pairs should go in separate unit tests.
  */
-public abstract class MapDriverBase<K1, V1, K2, V2> extends
-    TestDriver<K1, V1, K2, V2> {
+public abstract class MapDriverBase<K1, V1, K2, V2> extends TestDriver<K1, V1, K2, V2> {
 
   public static final Log LOG = LogFactory.getLog(MapDriverBase.class);
 
   protected K1 inputKey;
   protected V1 inputVal;
 
+
   /**
    * Sets the input key to send to the mapper
-   * 
+   *
    */
   public void setInputKey(K1 key) {
     inputKey = key;
@@ -56,7 +59,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
 
   /**
    * Sets the input value to send to the mapper
-   * 
+   *
    * @param val
    */
   public void setInputValue(V1 val) {
@@ -69,7 +72,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
 
   /**
    * Sets the input to send to the mapper
-   * 
+   *
    */
   public void setInput(K1 key, V1 val) {
     setInputKey(key);
@@ -78,7 +81,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
 
   /**
    * Sets the input to send to the mapper
-   * 
+   *
    * @param inputRecord
    *          a (key, val) pair
    */
@@ -93,7 +96,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
 
   /**
    * Adds an output (k, v) pair we expect from the Mapper
-   * 
+   *
    * @param outputRecord
    *          The (k, v) pair to add
    */
@@ -107,24 +110,22 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
 
   /**
    * Adds a (k, v) pair we expect as output from the mapper
-   * 
+   *
    */
   public void addOutput(K2 key, V2 val) {
     addOutput(new Pair<K2, V2>(key, val));
   }
 
   /**
-   * Expects an input of the form "key \t val" Forces the Mapper input types to
-   * Text.
-   * 
+   * Expects an input of the form "key \t val" Forces the Mapper input types
+   * to Text.
+   *
    * @param input
    *          A string of the form "key \t val".
    */
-  @SuppressWarnings("unchecked")
   public void setInputFromString(String input) {
     if (null == input) {
-      throw new IllegalArgumentException(
-          "null input given to setInputFromString");
+      throw new IllegalArgumentException("null input given to setInputFromString");
     } else {
       Pair<Text, Text> inputPair = parseTabbedPair(input);
       if (null != inputPair) {
@@ -140,13 +141,12 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
   }
 
   /**
-   * Expects an input of the form "key \t val" Forces the Mapper output types to
-   * Text.
-   * 
+   * Expects an input of the form "key \t val" Forces the Mapper output types
+   * to Text.
+   *
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    */
-  @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
       throw new IllegalArgumentException("null input given to setOutput");
@@ -157,8 +157,7 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
         // this.
         addOutput((Pair<K2, V2>) outputPair);
       } else {
-        throw new IllegalArgumentException(
-            "Could not parse output pair in setOutput");
+        throw new IllegalArgumentException("Could not parse output pair in setOutput");
       }
     }
   }
@@ -192,3 +191,4 @@ public abstract class MapDriverBase<K1, V1, K2, V2> extends
     }
   }
 }
+

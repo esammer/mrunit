@@ -18,10 +18,6 @@
 
 package org.apache.hadoop.mrunit.mapreduce.mock;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -29,69 +25,70 @@ import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
-import org.apache.hadoop.mrunit.mock.MockOutputCollector;
 import org.apache.hadoop.mrunit.types.Pair;
+import org.apache.hadoop.mrunit.mock.MockOutputCollector;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 /**
- * o.a.h.mapreduce.Mapper.map() expects to use a Mapper.Context object as a
- * parameter. We want to override the functionality of a lot of Context to have
- * it send the results back to us, etc. But since Mapper.Context is an inner
- * class of Mapper, we need to put any subclasses of Mapper.Context in a
- * subclass of Mapper.
- * 
+ * o.a.h.mapreduce.Mapper.map() expects to use a Mapper.Context
+ * object as a parameter. We want to override the functionality
+ * of a lot of Context to have it send the results back to us, etc.
+ * But since Mapper.Context is an inner class of Mapper, we need to
+ * put any subclasses of Mapper.Context in a subclass of Mapper.
+ *
  * This wrapper class exists for that purpose.
  */
-public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
-    Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
+    extends Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
   public static final Log LOG = LogFactory.getLog(MockMapContextWrapper.class);
 
   /**
-   * Mock context instance that provides input to and receives output from the
-   * Mapper instance under test.
+   * Mock context instance that provides input to and receives output from
+   * the Mapper instance under test.
    */
-  public class MockMapContext extends
-      Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context {
+  public class MockMapContext extends Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>.Context {
 
     private Iterator<Pair<KEYIN, VALUEIN>> inputIter;
     private Pair<KEYIN, VALUEIN> curInput;
     private MockOutputCollector<KEYOUT, VALUEOUT> output;
 
     /**
-     * Create a new instance with the passed configuration, map key/value input
+     * Create a new instance with the passed configuration, map key/value input 
      * pairs and counters
      * 
-     * @param configuration
-     *          Configuration for the mapper
-     * @param in
-     *          input key/value pairs for the mapper
-     * @param counters
-     *          pre-initialized counter values
+     * @param configuration Configuration for the mapper
+     * @param in input key/value pairs for the mapper
+     * @param counters pre-initialized counter values
      */
     public MockMapContext(final Configuration configuration,
-        final List<Pair<KEYIN, VALUEIN>> in, final Counters counters)
-        throws IOException, InterruptedException {
+        final List<Pair<KEYIN, VALUEIN>> in,
+        final Counters counters) throws IOException, InterruptedException {
 
-      super(configuration, new TaskAttemptID("mrunit-jt", 0, true, 0, 0), null,
-          null, new MockOutputCommitter(), new MockReporter(counters), null);
+      super(configuration,
+            new TaskAttemptID("mrunit-jt", 0, true, 0, 0),
+            null, null, new MockOutputCommitter(), new MockReporter(counters), null);
       this.inputIter = in.iterator();
       this.output = new MockOutputCollector<KEYOUT, VALUEOUT>();
     }
 
     /**
      * Create a new instance with the passed map key/value input pairs and
-     * counters. A new {@link Configuration} object will be created and used to
-     * configure the mapper
+     * counters. A new {@link Configuration} object will be created and used
+     * to configure the mapper
      * 
-     * @param in
-     *          input key/value pairs for the mapper
-     * @param counters
-     *          pre-initialized counter values
+     * @param in input key/value pairs for the mapper
+     * @param counters pre-initialized counter values
      */
     public MockMapContext(final List<Pair<KEYIN, VALUEIN>> in,
-        final Counters counters) throws IOException, InterruptedException {
+        final Counters counters)
+        throws IOException, InterruptedException {
       this(new Configuration(), in, counters);
     }
+
 
     @Override
     public InputSplit getInputSplit() {
@@ -133,8 +130,8 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     }
 
     /**
-     * @return the outputs from the MockOutputCollector back to the test
-     *         harness.
+     * @return the outputs from the MockOutputCollector back to
+     * the test harness.
      */
     public List<Pair<KEYOUT, VALUEOUT>> getOutputs() {
       return output.getOutputs();
@@ -142,13 +139,15 @@ public class MockMapContextWrapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
   }
 
   public MockMapContext getMockContext(Configuration configuration,
-      List<Pair<KEYIN, VALUEIN>> inputs, Counters counters) throws IOException,
-      InterruptedException {
+      List<Pair<KEYIN, VALUEIN>> inputs, Counters counters)
+      throws IOException, InterruptedException {
     return new MockMapContext(configuration, inputs, counters);
   }
 
-  public MockMapContext getMockContext(List<Pair<KEYIN, VALUEIN>> inputs,
-      Counters counters) throws IOException, InterruptedException {
+  public MockMapContext getMockContext(
+      List<Pair<KEYIN, VALUEIN>> inputs, Counters counters)
+      throws IOException, InterruptedException {
     return new MockMapContext(inputs, counters);
   }
 }
+

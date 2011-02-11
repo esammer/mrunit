@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.mrunit;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,52 +32,48 @@ import org.apache.hadoop.mrunit.types.Pair;
 
 /**
  * Harness that allows you to test a dataflow through a set of Mappers and
- * Reducers. You provide a set of (Mapper, Reducer) "jobs" that make up a
- * workflow, as well as a set of (key, value) pairs to pass in to the first
+ * Reducers. You provide a set of (Mapper, Reducer) "jobs" that make up
+ * a workflow, as well as a set of (key, value) pairs to pass in to the first
  * Mapper. You can also specify the outputs you expect to be sent to the final
  * Reducer in the pipeline.
- * 
- * By calling runTest(), the harness will deliver the input to the first Mapper,
- * feed the intermediate results to the first Reducer (without checking them),
- * and proceed to forward this data along to subsequent Mapper/Reducer jobs in
- * the pipeline until the final Reducer. The last Reducer's outputs are checked
- * against the expected results.
- * 
+ *
+ * By calling runTest(), the harness will deliver the input to the first
+ * Mapper, feed the intermediate results to the first Reducer (without checking
+ * them), and proceed to forward this data along to subsequent Mapper/Reducer
+ * jobs in the pipeline until the final Reducer. The last Reducer's outputs are
+ * checked against the expected results.
+ *
  * This is designed for slightly more complicated integration tests than the
  * MapReduceDriver, which is for smaller unit tests.
- * 
+ *
  * (K1, V1) in the type signature refer to the types associated with the inputs
  * to the first Mapper. (K2, V2) refer to the types associated with the final
  * Reducer's output. No intermediate types are specified.
  */
-@SuppressWarnings("deprecation")
-public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
-    TestDriver<K1, V1, K2, V2> {
+public class PipelineMapReduceDriver<K1, V1, K2, V2>
+    extends TestDriver<K1, V1, K2, V2> {
 
-  public static final Log LOG = LogFactory
-      .getLog(PipelineMapReduceDriver.class);
+  public static final Log LOG = LogFactory.getLog(PipelineMapReduceDriver.class);
 
-  private List<Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>>> mapReducePipeline;
+  private List<Pair<Mapper, Reducer>> mapReducePipeline;
   private List<Pair<K1, V1>> inputList;
   private Counters counters;
 
-  public PipelineMapReduceDriver(
-      final List<Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>>> pipeline) {
+  public PipelineMapReduceDriver(final List<Pair<Mapper, Reducer>> pipeline) {
     this.mapReducePipeline = copyMapReduceList(pipeline);
     this.inputList = new ArrayList<Pair<K1, V1>>();
     this.counters = new Counters();
   }
 
   public PipelineMapReduceDriver() {
-    this.mapReducePipeline = new ArrayList<Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>>>();
+    this.mapReducePipeline = new ArrayList<Pair<Mapper, Reducer>>();
     this.inputList = new ArrayList<Pair<K1, V1>>();
     this.counters = new Counters();
   }
 
-  private List<Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>>> copyMapReduceList(
-      List<Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>>> lst) {
-    List<Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>>> outList = new ArrayList<Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>>>();
-    for (Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>> p : lst) {
+  private List<Pair<Mapper, Reducer>> copyMapReduceList(List<Pair<Mapper, Reducer>> lst) {
+    List<Pair<Mapper, Reducer>> outList = new ArrayList<Pair<Mapper, Reducer>>();
+    for (Pair<Mapper, Reducer> p : lst) {
       // Take advantage of the fact that Pair is immutable.
       outList.add(p);
     }
@@ -89,73 +86,51 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     return counters;
   }
 
-  /**
-   * Sets the counters object to use for this test.
-   * 
-   * @param ctrs
-   *          The counters object to use.
+  /** Sets the counters object to use for this test.
+   * @param ctrs The counters object to use.
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
   }
 
   /** Sets the counters to use and returns self for fluent style */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounters(
-      final Counters ctrs) {
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withCounters(final Counters ctrs) {
     setCounters(ctrs);
     return this;
   }
 
-  /**
-   * Add a Mapper and Reducer instance to the pipeline to use with this test
-   * driver
-   * 
-   * @param m
-   *          The Mapper instance to add to the pipeline
-   * @param r
-   *          The Reducer instance to add to the pipeline
+
+  /** Add a Mapper and Reducer instance to the pipeline to use with this test driver
+   * @param m The Mapper instance to add to the pipeline
+   * @param r The Reducer instance to add to the pipeline
    */
-  public void addMapReduce(Mapper<?, ?, ?, ?> m, Reducer<?, ?, ?, ?> r) {
-    Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>> p = new Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>>(
-        m, r);
+  public void addMapReduce(Mapper m, Reducer r) {
+    Pair<Mapper, Reducer> p = new Pair<Mapper, Reducer>(m, r);
     this.mapReducePipeline.add(p);
   }
 
-  /**
-   * Add a Mapper and Reducer instance to the pipeline to use with this test
-   * driver
-   * 
-   * @param p
-   *          The Mapper and Reducer instances to add to the pipeline
+  /** Add a Mapper and Reducer instance to the pipeline to use with this test driver
+   * @param p The Mapper and Reducer instances to add to the pipeline
    */
-  public void addMapReduce(Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>> p) {
+  public void addMapReduce(Pair<Mapper, Reducer> p) {
     this.mapReducePipeline.add(p);
   }
 
-  /**
-   * Add a Mapper and Reducer instance to the pipeline to use with this test
-   * driver using fluent style
-   * 
-   * @param m
-   *          The Mapper instance to use
-   * @param r
-   *          The Reducer instance to use
+  /** Add a Mapper and Reducer instance to the pipeline to use with this test driver
+   * using fluent style
+   * @param m The Mapper instance to use
+   * @param r The Reducer instance to use
    */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withMapReduce(
-      Mapper<?, ?, ?, ?> m, Reducer<?, ?, ?, ?> r) {
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withMapReduce(Mapper m, Reducer r) {
     addMapReduce(m, r);
     return this;
   }
 
-  /**
-   * Add a Mapper and Reducer instance to the pipeline to use with this test
-   * driver using fluent style
-   * 
-   * @param p
-   *          The Mapper and Reducer instances to add to the pipeline
+  /** Add a Mapper and Reducer instance to the pipeline to use with this test driver
+   * using fluent style
+   * @param p The Mapper and Reducer instances to add to the pipeline
    */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withMapReduce(
-      Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>> p) {
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withMapReduce(Pair<Mapper, Reducer> p) {
     addMapReduce(p);
     return this;
   }
@@ -163,13 +138,12 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   /**
    * @return A copy of the list of Mapper and Reducer objects under test
    */
-  public List<Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>>> getMapReducePipeline() {
+  public List<Pair<Mapper, Reducer>> getMapReducePipeline() {
     return copyMapReduceList(this.mapReducePipeline);
   }
 
   /**
    * Adds an input to send to the mapper
-   * 
    * @param key
    * @param val
    */
@@ -179,7 +153,6 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   * 
    * @param key
    * @param val
    * @return this
@@ -191,9 +164,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Adds an input to send to the Mapper
-   * 
-   * @param input
-   *          The (k, v) pair to add to the input list.
+   * @param input The (k, v) pair to add to the input list.
    */
   public void addInput(Pair<K1, V1> input) {
     if (null == input) {
@@ -205,21 +176,18 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addInput() but returns self for fluent programming style
-   * 
-   * @param input
-   *          The (k, v) pair to add
+   * @param input The (k, v) pair to add
    * @return this
    */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withInput(Pair<K1, V1> input) {
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withInput(
+      Pair<K1, V1> input) {
     addInput(input);
     return this;
   }
 
   /**
    * Adds an output (k, v) pair we expect from the Reducer
-   * 
-   * @param outputRecord
-   *          The (k, v) pair to add
+   * @param outputRecord The (k, v) pair to add
    */
   public void addOutput(Pair<K2, V2> outputRecord) {
     if (null != outputRecord) {
@@ -231,19 +199,17 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   * 
    * @param outputRecord
    * @return this
    */
   public PipelineMapReduceDriver<K1, V1, K2, V2> withOutput(
-      Pair<K2, V2> outputRecord) {
+          Pair<K2, V2> outputRecord) {
     addOutput(outputRecord);
     return this;
   }
 
   /**
    * Adds a (k, v) pair we expect as output from the Reducer
-   * 
    * @param key
    * @param val
    */
@@ -253,7 +219,6 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Functions like addOutput() but returns self for fluent programming style
-   * 
    * @param key
    * @param val
    * @return this
@@ -264,13 +229,10 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
   }
 
   /**
-   * Expects an input of the form "key \t val" Forces the Mapper input types to
-   * Text.
-   * 
-   * @param input
-   *          A string of the form "key \t val". Trims any whitespace.
+   * Expects an input of the form "key \t val"
+   * Forces the Mapper input types to Text.
+   * @param input A string of the form "key \t val". Trims any whitespace.
    */
-  @SuppressWarnings("unchecked")
   public void addInputFromString(String input) {
     if (null == input) {
       throw new IllegalArgumentException("null input given to setInput");
@@ -281,33 +243,26 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
         // know a better way to do this.
         addInput((Pair<K1, V1>) inputPair);
       } else {
-        throw new IllegalArgumentException(
-            "Could not parse input pair in addInput");
+        throw new IllegalArgumentException("Could not parse input pair in addInput");
       }
     }
   }
 
   /**
    * Identical to addInputFromString, but with a fluent programming style
-   * 
-   * @param input
-   *          A string of the form "key \t val". Trims any whitespace.
+   * @param input A string of the form "key \t val". Trims any whitespace.
    * @return this
    */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withInputFromString(
-      String input) {
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withInputFromString(String input) {
     addInputFromString(input);
     return this;
   }
 
   /**
-   * Expects an input of the form "key \t val" Forces the Reducer output types
-   * to Text.
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
+   * Expects an input of the form "key \t val"
+   * Forces the Reducer output types to Text.
+   * @param output A string of the form "key \t val". Trims any whitespace.
    */
-  @SuppressWarnings("unchecked")
   public void addOutputFromString(String output) {
     if (null == output) {
       throw new IllegalArgumentException("null input given to setOutput");
@@ -326,20 +281,17 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
 
   /**
    * Identical to addOutputFromString, but with a fluent programming style
-   * 
-   * @param output
-   *          A string of the form "key \t val". Trims any whitespace.
+   * @param output A string of the form "key \t val". Trims any whitespace.
    * @return this
    */
-  public PipelineMapReduceDriver<K1, V1, K2, V2> withOutputFromString(
-      String output) {
+  public PipelineMapReduceDriver<K1, V1, K2, V2> withOutputFromString(String output) {
     addOutputFromString(output);
     return this;
   }
 
   public List<Pair<K2, V2>> run() throws IOException {
     // inputs starts with the user-provided inputs.
-    List<Pair<K1, V1>> inputs = this.inputList;
+    List inputs = this.inputList;
 
     if (mapReducePipeline.size() == 0) {
       LOG.warn("No Mapper or Reducer instances in pipeline; this is a trivial test.");
@@ -349,15 +301,13 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
       LOG.warn("No inputs configured to send to MapReduce pipeline; this is a trivial test.");
     }
 
-    for (Pair<Mapper<?, ?, ?, ?>, Reducer<?, ?, ?, ?>> job : mapReducePipeline) {
+    for (Pair<Mapper, Reducer> job : mapReducePipeline) {
       // Create a MapReduceDriver to run this phase of the pipeline.
-      MapReduceDriver<?, ?, ?, ?, ?, ?> mrDriver = new MapReduceDriver<?, ?, ?, ?, ?, ?>(job.getFirst(),
-          job.getSecond());
+      MapReduceDriver mrDriver = new MapReduceDriver(job.getFirst(), job.getSecond());
 
       mrDriver.setCounters(getCounters());
 
-      // Add the inputs from the user, or from the previous stage of the
-      // pipeline.
+      // Add the inputs from the user, or from the previous stage of the pipeline.
       for (Object input : inputs) {
         mrDriver.addInput((Pair) input);
       }
@@ -368,7 +318,7 @@ public class PipelineMapReduceDriver<K1, V1, K2, V2> extends
     }
 
     // The last list of values stored in "inputs" is actually the outputs.
-    // Unfortunately, due to the variable-length list of MR passes the user
+    // Unfortunately, due to the variable-length list of MR passes the user 
     // can test, this is not type-safe.
     return (List<Pair<K2, V2>>) inputs;
   }

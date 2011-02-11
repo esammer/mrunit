@@ -18,6 +18,7 @@
 
 package org.apache.hadoop.mrunit.mapreduce;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mrunit.MapDriverBase;
@@ -32,13 +34,13 @@ import org.apache.hadoop.mrunit.mapreduce.mock.MockMapContextWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * Harness that allows you to test a Mapper instance. You provide the input key
- * and value that should be sent to the Mapper, and outputs you expect to be
- * sent by the Mapper to the collector for those inputs. By calling runTest(),
- * the harness will deliver the input to the Mapper and will check its outputs
- * against the expected results. This is designed to handle a single (k, v) ->
- * (k, v)* case from the Mapper, representing a single unit test. Multiple input
- * (k, v) pairs should go in separate unit tests.
+ * Harness that allows you to test a Mapper instance. You provide the input
+ * key and value that should be sent to the Mapper, and outputs you expect to
+ * be sent by the Mapper to the collector for those inputs. By calling
+ * runTest(), the harness will deliver the input to the Mapper and will check
+ * its outputs against the expected results. This is designed to handle a
+ * single (k, v) -> (k, v)* case from the Mapper, representing a single unit
+ * test. Multiple input (k, v) pairs should go in separate unit tests.
  */
 public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
@@ -56,11 +58,11 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     counters = new Counters();
   }
 
+
   /**
    * Set the Mapper instance to use with this test driver
-   * 
-   * @param m
-   *          the Mapper instance to use
+   *
+   * @param m the Mapper instance to use
    */
   public void setMapper(Mapper<K1, V1, K2, V2> m) {
     myMapper = m;
@@ -84,11 +86,8 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     return counters;
   }
 
-  /**
-   * Sets the counters object to use for this test.
-   * 
-   * @param ctrs
-   *          The counters object to use.
+  /** Sets the counters object to use for this test.
+   * @param ctrs The counters object to use.
    */
   public void setCounters(final Counters ctrs) {
     this.counters = ctrs;
@@ -102,7 +101,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   /**
    * Identical to setInputKey() but with fluent programming style
-   * 
+   *
    * @return this
    */
   public MapDriver<K1, V1, K2, V2> withInputKey(K1 key) {
@@ -112,7 +111,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   /**
    * Identical to setInputValue() but with fluent programming style
-   * 
+   *
    * @param val
    * @return this
    */
@@ -123,7 +122,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   * 
+   *
    * @return this
    */
   public MapDriver<K1, V1, K2, V2> withInput(K1 key, V1 val) {
@@ -133,7 +132,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   /**
    * Identical to setInput() but returns self for fluent programming style
-   * 
+   *
    * @param inputRecord
    * @return this
    */
@@ -144,7 +143,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   /**
    * Works like addOutput(), but returns self for fluent style
-   * 
+   *
    * @param outputRecord
    * @return this
    */
@@ -154,8 +153,9 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   }
 
   /**
-   * Functions like addOutput() but returns self for fluent programming style
-   * 
+   * Functions like addOutput() but returns self for fluent programming
+   * style
+   *
    * @return this
    */
   public MapDriver<K1, V1, K2, V2> withOutput(K2 key, V2 val) {
@@ -165,7 +165,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   /**
    * Identical to setInputFromString, but with a fluent programming style
-   * 
+   *
    * @param input
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -177,7 +177,7 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   /**
    * Identical to addOutputFromString, but with a fluent programming style
-   * 
+   *
    * @param output
    *          A string of the form "key \t val". Trims any whitespace.
    * @return this
@@ -193,9 +193,9 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
     inputs.add(new Pair<K1, V1>(inputKey, inputVal));
 
     try {
-      MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>();
-      MockMapContextWrapper<K1, V1, K2, V2>.MockMapContext context = wrapper
-          .getMockContext(configuration, inputs, getCounters());
+      MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper();
+      MockMapContextWrapper<K1, V1, K2, V2>.MockMapContext context =
+          wrapper.getMockContext(configuration, inputs, getCounters());
 
       myMapper.run(context);
       return context.getOutputs();
@@ -208,15 +208,15 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
   public String toString() {
     return "MapDriver (0.20+) (" + myMapper + ")";
   }
-
-  /**
-   * @param configuration
-   *          The configuration object that will given to the mapper associated
-   *          with the driver
+  
+  /** 
+   * @param configuration The configuration object that will given to the mapper
+   *        associated with the driver
    * @return this object for fluent coding
    */
   public MapDriver<K1, V1, K2, V2> withConfiguration(Configuration configuration) {
     setConfiguration(configuration);
-    return this;
+	  return this;
   }
 }
+

@@ -26,12 +26,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Example test of the IdentityMapper to demonstrate proper MapDriver usage in a
- * test case.
- * 
+ * Example test of the IdentityMapper to demonstrate proper MapDriver
+ * usage in a test case.
+ *
  * This example is reproduced in the overview for the MRUnit javadoc.
  */
-@SuppressWarnings("deprecation")
 public class TestExample extends TestCase {
 
   private Mapper<Text, Text, Text, Text> mapper;
@@ -46,6 +45,8 @@ public class TestExample extends TestCase {
   @Test
   public void testIdentityMapper() {
     driver.withInput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("foo"), new Text("bar")).runTest();
+            .withOutput(new Text("foo"), new Text("bar"))
+            .runTest();
   }
 }
+

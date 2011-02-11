@@ -18,18 +18,18 @@
 package org.apache.hadoop.mrunit.mock;
 
 import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.Counters.Counter;
 
-@SuppressWarnings("deprecation")
 public class MockReporter implements Reporter {
 
   private MockInputSplit inputSplit = new MockInputSplit();
   private Counters counters;
 
   public enum ReporterType {
-    Mapper, Reducer
+    Mapper,
+    Reducer
   }
 
   private ReporterType typ;
@@ -43,14 +43,14 @@ public class MockReporter implements Reporter {
   public InputSplit getInputSplit() {
     if (typ == ReporterType.Reducer) {
       throw new UnsupportedOperationException(
-          "Reducer cannot call getInputSplit()");
+              "Reducer cannot call getInputSplit()");
     } else {
       return inputSplit;
     }
   }
 
   @Override
-  public void incrCounter(Enum<?> key, long amount) {
+  public void incrCounter(Enum key, long amount) {
     if (null != counters) {
       counters.incrCounter(key, amount);
     }
@@ -84,7 +84,7 @@ public class MockReporter implements Reporter {
   }
 
   @Override
-  public Counter getCounter(Enum<?> key) {
+  public Counter getCounter(Enum key) {
     Counters.Counter counter = null;
     if (counters != null) {
       counter = counters.findCounter(key);
@@ -93,3 +93,4 @@ public class MockReporter implements Reporter {
     return counter;
   }
 }
+

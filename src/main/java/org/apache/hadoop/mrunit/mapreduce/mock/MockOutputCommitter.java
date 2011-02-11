@@ -18,9 +18,11 @@
 
 package org.apache.hadoop.mrunit.mapreduce.mock;
 
-import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+import java.io.IOException;
 
 /**
  * Mock implementation of OutputCommitter that does nothing.
@@ -46,3 +48,4 @@ public class MockOutputCommitter extends OutputCommitter {
   public void abortTask(TaskAttemptContext taskContext) {
   }
 }
+

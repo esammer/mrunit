@@ -17,7 +17,7 @@
  */
 package org.apache.hadoop.mrunit;
 
-import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
+import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,7 +32,6 @@ import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
-@SuppressWarnings("deprecation")
 public class TestMapDriver extends TestCase {
 
   private Mapper<Text, Text, Text, Text> mapper;
@@ -63,13 +62,15 @@ public class TestMapDriver extends TestCase {
   @Test
   public void testTestRun1() {
     driver.withInput(new Text("foo"), new Text("bar"))
-        .withOutput(new Text("foo"), new Text("bar")).runTest();
+            .withOutput(new Text("foo"), new Text("bar"))
+            .runTest();
   }
 
   @Test
   public void testTestRun2() {
     try {
-      driver.withInput(new Text("foo"), new Text("bar")).runTest();
+      driver.withInput(new Text("foo"), new Text("bar"))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -80,8 +81,9 @@ public class TestMapDriver extends TestCase {
   public void testTestRun3() {
     try {
       driver.withInput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("foo"), new Text("bar")).runTest();
+            .withOutput(new Text("foo"), new Text("bar"))
+            .withOutput(new Text("foo"), new Text("bar"))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -92,20 +94,21 @@ public class TestMapDriver extends TestCase {
   public void testTestRun4() {
     try {
       driver.withInput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("bonusfoo"), new Text("bar")).runTest();
+            .withOutput(new Text("foo"), new Text("bar"))
+            .withOutput(new Text("bonusfoo"), new Text("bar"))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
     }
 
   }
-
   @Test
   public void testTestRun5() {
     try {
       driver.withInput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("foo"), new Text("somethingelse")).runTest();
+            .withOutput(new Text("foo"), new Text("somethingelse"))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -116,7 +119,8 @@ public class TestMapDriver extends TestCase {
   public void testTestRun6() {
     try {
       driver.withInput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("someotherkey"), new Text("bar")).runTest();
+              .withOutput(new Text("someotherkey"), new Text("bar"))
+              .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -127,8 +131,9 @@ public class TestMapDriver extends TestCase {
   public void testTestRun7() {
     try {
       driver.withInput(new Text("foo"), new Text("bar"))
-          .withOutput(new Text("someotherkey"), new Text("bar"))
-          .withOutput(new Text("foo"), new Text("bar")).runTest();
+            .withOutput(new Text("someotherkey"), new Text("bar"))
+            .withOutput(new Text("foo"), new Text("bar"))
+            .runTest();
       fail();
     } catch (RuntimeException re) {
       // expected.
@@ -178,3 +183,4 @@ public class TestMapDriver extends TestCase {
   }
 
 }
+
