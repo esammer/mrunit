@@ -15,32 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.mock;
 
-import junit.framework.TestCase;
+package org.apache.hadoop.mrunit.mapreduce;
 
-import org.apache.hadoop.mapred.InputSplit;
-import org.junit.Test;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
+/**
+ * All tests for the new 0.20+ mapreduce API versions of the test harness.
+ */
+public final class AllTests  {
 
-public class TestMockReporter extends TestCase {
+  private AllTests() { }
 
-  @Test
-  public void testGetInputSplitForMapper() {
-    InputSplit split = new MockReporter(MockReporter.ReporterType.Mapper, null).getInputSplit();
-    assertTrue(null != split);
+  public static Test suite() {
+    TestSuite suite = new TestSuite("Test for org.apache.hadoop.mrunit.mapreduce");
+
+    suite.addTestSuite(TestMapDriver.class);
+    suite.addTestSuite(TestReduceDriver.class);
+    suite.addTestSuite(TestMapReduceDriver.class);
+    suite.addTestSuite(TestCounters.class);
+
+    return suite;
   }
 
-  // reporter is contractually obligated to throw an exception
-  // if the reducer tries to grab the input split.
-  @Test
-  public void testGetInputSplitForReducer() {
-    try {
-      new MockReporter(MockReporter.ReporterType.Reducer, null).getInputSplit();
-      fail(); // shouldn't get here
-    } catch (UnsupportedOperationException uoe) {
-      // expected this.
-    }
-  }
 }
 

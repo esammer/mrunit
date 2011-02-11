@@ -15,17 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit;
+
+package org.apache.hadoop.mrunit.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mrunit.mock.MockOutputCollector;
-import org.apache.hadoop.mrunit.mock.MockReporter;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mrunit.MapDriverBase;
+import org.apache.hadoop.mrunit.mapreduce.mock.MockMapContextWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -37,7 +40,6 @@ import org.apache.hadoop.mrunit.types.Pair;
  * (k, v)* case from the Mapper, representing a single unit test. Multiple input
  * (k, v) pairs should go in separate unit tests.
  */
-@SuppressWarnings("deprecation")
 public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   public static final Log LOG = LogFactory.getLog(MapDriver.class);
@@ -52,27 +54,6 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   public MapDriver() {
     counters = new Counters();
-  }
-
-  /** @return the counters used in this test */
-  public Counters getCounters() {
-    return counters;
-  }
-
-  /**
-   * Sets the counters object to use for this test.
-   * 
-   * @param ctrs
-   *          The counters object to use.
-   */
-  public void setCounters(final Counters ctrs) {
-    this.counters = ctrs;
-  }
-
-  /** Sets the counters to use and returns self for fluent style */
-  public MapDriver<K1, V1, K2, V2> withCounters(final Counters ctrs) {
-    setCounters(ctrs);
-    return this;
   }
 
   /**
@@ -96,6 +77,27 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
    */
   public Mapper<K1, V1, K2, V2> getMapper() {
     return myMapper;
+  }
+
+  /** @return the counters used in this test */
+  public Counters getCounters() {
+    return counters;
+  }
+
+  /**
+   * Sets the counters object to use for this test.
+   * 
+   * @param ctrs
+   *          The counters object to use.
+   */
+  public void setCounters(final Counters ctrs) {
+    this.counters = ctrs;
+  }
+
+  /** Sets the counters to use and returns self for fluent style */
+  public MapDriver<K1, V1, K2, V2> withCounters(final Counters ctrs) {
+    setCounters(ctrs);
+    return this;
   }
 
   /**
@@ -187,17 +189,34 @@ public class MapDriver<K1, V1, K2, V2> extends MapDriverBase<K1, V1, K2, V2> {
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    MockOutputCollector<K2, V2> outputCollector = new MockOutputCollector<K2, V2>();
-    MockReporter reporter = new MockReporter(MockReporter.ReporterType.Mapper,
-        getCounters());
+    List<Pair<K1, V1>> inputs = new ArrayList<Pair<K1, V1>>();
+    inputs.add(new Pair<K1, V1>(inputKey, inputVal));
 
-    myMapper.map(inputKey, inputVal, outputCollector, reporter);
+    try {
+      MockMapContextWrapper<K1, V1, K2, V2> wrapper = new MockMapContextWrapper<K1, V1, K2, V2>();
+      MockMapContextWrapper<K1, V1, K2, V2>.MockMapContext context = wrapper
+          .getMockContext(configuration, inputs, getCounters());
 
-    return outputCollector.getOutputs();
+      myMapper.run(context);
+      return context.getOutputs();
+    } catch (InterruptedException ie) {
+      throw new IOException(ie);
+    }
   }
 
   @Override
   public String toString() {
-    return "MapDriver (" + myMapper + ")";
+    return "MapDriver (0.20+) (" + myMapper + ")";
+  }
+
+  /**
+   * @param configuration
+   *          The configuration object that will given to the mapper associated
+   *          with the driver
+   * @return this object for fluent coding
+   */
+  public MapDriver<K1, V1, K2, V2> withConfiguration(Configuration configuration) {
+    setConfiguration(configuration);
+    return this;
   }
 }

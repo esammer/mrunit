@@ -15,32 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.mock;
 
-import junit.framework.TestCase;
+package org.apache.hadoop.mrunit.mapreduce.mock;
 
-import org.apache.hadoop.mapred.InputSplit;
-import org.junit.Test;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+/**
+ * Mock implementation of InputSplit that does nothing.
+ */
+public class MockInputSplit extends FileSplit {
 
-public class TestMockReporter extends TestCase {
+  private static final Path MOCK_PATH = new Path("somefile");
 
-  @Test
-  public void testGetInputSplitForMapper() {
-    InputSplit split = new MockReporter(MockReporter.ReporterType.Mapper, null).getInputSplit();
-    assertTrue(null != split);
+  public MockInputSplit() {
+    super(MOCK_PATH, 0, 0, (String[]) null);
   }
 
-  // reporter is contractually obligated to throw an exception
-  // if the reducer tries to grab the input split.
-  @Test
-  public void testGetInputSplitForReducer() {
-    try {
-      new MockReporter(MockReporter.ReporterType.Reducer, null).getInputSplit();
-      fail(); // shouldn't get here
-    } catch (UnsupportedOperationException uoe) {
-      // expected this.
-    }
+  public String toString() {
+    return "MockInputSplit";
+  }
+
+  /**
+   * Return the path object represented by this as a FileSplit.
+   */
+  public static Path getMockPath() {
+    return MOCK_PATH;
   }
 }
-

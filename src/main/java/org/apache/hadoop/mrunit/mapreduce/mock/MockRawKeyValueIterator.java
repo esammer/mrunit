@@ -15,32 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.mock;
 
-import junit.framework.TestCase;
+package org.apache.hadoop.mrunit.mapreduce.mock;
 
-import org.apache.hadoop.mapred.InputSplit;
-import org.junit.Test;
+import org.apache.hadoop.io.DataInputBuffer;
+import org.apache.hadoop.mapred.RawKeyValueIterator;
+import org.apache.hadoop.util.Progress;
 
-
-public class TestMockReporter extends TestCase {
-
-  @Test
-  public void testGetInputSplitForMapper() {
-    InputSplit split = new MockReporter(MockReporter.ReporterType.Mapper, null).getInputSplit();
-    assertTrue(null != split);
+/**
+ * Mock implementation of RawKeyValueIterator that does nothing.
+ */
+public class MockRawKeyValueIterator implements RawKeyValueIterator {
+  public DataInputBuffer getKey() {
+    return null;
   }
 
-  // reporter is contractually obligated to throw an exception
-  // if the reducer tries to grab the input split.
-  @Test
-  public void testGetInputSplitForReducer() {
-    try {
-      new MockReporter(MockReporter.ReporterType.Reducer, null).getInputSplit();
-      fail(); // shouldn't get here
-    } catch (UnsupportedOperationException uoe) {
-      // expected this.
-    }
+  public DataInputBuffer getValue() {
+    return null;
+  }
+
+  public boolean next() {
+    return false;
+  }
+
+  public void close() {
+  }
+
+  public Progress getProgress() {
+    return null;
   }
 }
-

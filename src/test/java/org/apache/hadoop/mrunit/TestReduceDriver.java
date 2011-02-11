@@ -18,22 +18,27 @@
 package org.apache.hadoop.mrunit;
 
 import static org.apache.hadoop.mrunit.testutil.ExtendedAssert.assertListEquals;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import junit.framework.TestCase;
 
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.lib.LongSumReducer;
 import org.apache.hadoop.mrunit.types.Pair;
 import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings("deprecation")
-public class TestReduceDriver {
+public class TestReduceDriver extends TestCase {
 
   private static final int IN_A = 4;
   private static final int IN_B = 6;
@@ -71,20 +76,20 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void TesttestRun1() {
+  public void testTestRun1() {
     driver.withInputKey(new Text("foo"))
         .withOutput(new Text("foo"), new LongWritable(0)).runTest();
   }
 
   @Test
-  public void TesttestRun2() {
+  public void testTestRun2() {
     driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(IN_A))
         .withInputValue(new LongWritable(IN_B))
         .withOutput(new Text("foo"), new LongWritable(OUT_VAL)).runTest();
   }
 
   @Test
-  public void TesttestRun3() {
+  public void testTestRun3() {
     try {
       driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
@@ -98,7 +103,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void TesttestRun4() {
+  public void testTestRun4() {
     try {
       driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
@@ -112,7 +117,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void TesttestRun5() {
+  public void testTestRun5() {
     try {
       driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
@@ -125,7 +130,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void TesttestRun6() {
+  public void testTestRun6() {
     try {
       driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
@@ -139,7 +144,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void TesttestRun7() {
+  public void testTestRun7() {
     try {
       driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
@@ -153,7 +158,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void TesttestRun8() {
+  public void testTestRun8() {
     try {
       driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
@@ -167,7 +172,7 @@ public class TestReduceDriver {
   }
 
   @Test
-  public void TesttestRun9() {
+  public void testTestRun9() {
     try {
       driver.withInputKey(new Text("foo"))
           .withInputValue(new LongWritable(IN_A))
@@ -197,5 +202,41 @@ public class TestReduceDriver {
     } catch (RuntimeException re) {
       // expected.
     }
+  }
+
+  /**
+   * Reducer that counts its values twice; the second iteration according to
+   * mapreduce semantics should be empty.
+   */
+  private static class DoubleIterReducer<K, V> extends MapReduceBase implements
+      Reducer<K, V, K, LongWritable> {
+    public void reduce(K key, Iterator<V> values,
+        OutputCollector<K, LongWritable> out, Reporter r) throws IOException {
+      long count = 0;
+
+      while (values.hasNext()) {
+        count++;
+        values.next();
+      }
+
+      // This time around, iteration should yield no values.
+      while (values.hasNext()) {
+        count++;
+        values.next();
+      }
+      out.collect(key, new LongWritable(count));
+    }
+  }
+
+  @Test
+  public void testDoubleIteration() {
+    reducer = new DoubleIterReducer<Text, LongWritable>();
+    driver = new ReduceDriver<Text, LongWritable, Text, LongWritable>(reducer);
+
+    driver.withInputKey(new Text("foo")).withInputValue(new LongWritable(1))
+        .withInputValue(new LongWritable(1))
+        .withInputValue(new LongWritable(1))
+        .withInputValue(new LongWritable(1))
+        .withOutput(new Text("foo"), new LongWritable(4)).runTest();
   }
 }

@@ -17,9 +17,10 @@
  */
 package org.apache.hadoop.mrunit.testutil;
 
-import java.util.List;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import static org.junit.Assert.*;
+import java.util.List;
 
 public final class ExtendedAssert {
 

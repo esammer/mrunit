@@ -15,17 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit;
+
+package org.apache.hadoop.mrunit.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.Reducer;
-import org.apache.hadoop.mrunit.mock.MockOutputCollector;
-import org.apache.hadoop.mrunit.mock.MockReporter;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mrunit.ReduceDriverBase;
+import org.apache.hadoop.mrunit.mapreduce.mock.MockReduceContextWrapper;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
@@ -38,7 +41,6 @@ import org.apache.hadoop.mrunit.types.Pair;
  * from the Reducer, representing a single unit test. Multiple input (k, v*)
  * sets should go in separate unit tests.
  */
-@SuppressWarnings("deprecation")
 public class ReduceDriver<K1, V1, K2, V2> extends
     ReduceDriverBase<K1, V1, K2, V2> {
 
@@ -54,27 +56,6 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   public ReduceDriver() {
     counters = new Counters();
-  }
-
-  /** @return the counters used in this test */
-  public Counters getCounters() {
-    return counters;
-  }
-
-  /**
-   * Sets the counters object to use for this test.
-   * 
-   * @param ctrs
-   *          The counters object to use.
-   */
-  public void setCounters(final Counters ctrs) {
-    this.counters = ctrs;
-  }
-
-  /** Sets the counters to use and returns self for fluent style */
-  public ReduceDriver<K1, V1, K2, V2> withCounters(final Counters ctrs) {
-    setCounters(ctrs);
-    return this;
   }
 
   /**
@@ -101,6 +82,27 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   public Reducer<K1, V1, K2, V2> getReducer() {
     return myReducer;
+  }
+
+  /** @return the counters used in this test */
+  public Counters getCounters() {
+    return counters;
+  }
+
+  /**
+   * Sets the counters object to use for this test.
+   * 
+   * @param ctrs
+   *          The counters object to use.
+   */
+  public void setCounters(final Counters ctrs) {
+    this.counters = ctrs;
+  }
+
+  /** Sets the counters to use and returns self for fluent style */
+  public ReduceDriver<K1, V1, K2, V2> withCounters(final Counters ctrs) {
+    setCounters(ctrs);
+    return this;
   }
 
   /**
@@ -196,19 +198,35 @@ public class ReduceDriver<K1, V1, K2, V2> extends
 
   @Override
   public List<Pair<K2, V2>> run() throws IOException {
-    MockOutputCollector<K2, V2> outputCollector = new MockOutputCollector<K2, V2>();
-    MockReporter reporter = new MockReporter(MockReporter.ReporterType.Reducer,
-        getCounters());
+    List<Pair<K1, List<V1>>> inputs = new ArrayList<Pair<K1, List<V1>>>();
+    inputs.add(new Pair<K1, List<V1>>(inputKey, inputValues));
 
-    myReducer.reduce(inputKey, inputValues.iterator(), outputCollector,
-        reporter);
+    try {
+      MockReduceContextWrapper<K1, V1, K2, V2> wrapper = new MockReduceContextWrapper<K1, V1, K2, V2>();
+      MockReduceContextWrapper<K1, V1, K2, V2>.MockReduceContext context = wrapper
+          .getMockContext(configuration, inputs, getCounters());
 
-    List<Pair<K2, V2>> outputs = outputCollector.getOutputs();
-    return outputs;
+      myReducer.run(context);
+      return context.getOutputs();
+    } catch (InterruptedException ie) {
+      throw new IOException(ie);
+    }
   }
 
   @Override
   public String toString() {
-    return "ReduceDriver (" + myReducer + ")";
+    return "ReduceDriver (0.20+) (" + myReducer + ")";
+  }
+
+  /**
+   * @param configuration
+   *          The configuration object that will given to the reducer associated
+   *          with the driver
+   * @return this object for fluent coding
+   */
+  public ReduceDriver<K1, V1, K2, V2> withConfiguration(
+      Configuration configuration) {
+    setConfiguration(configuration);
+    return this;
   }
 }

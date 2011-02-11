@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit;
+package org.apache.hadoop.mrunit.mapreduce;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,34 +23,31 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.RawComparator;
-import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.Reducer;
+import org.apache.hadoop.mapreduce.Counters;
+import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mrunit.MapReduceDriverBase;
 import org.apache.hadoop.mrunit.types.Pair;
 
 /**
- * Harness that allows you to test a Mapper and a Reducer instance together
- * (along with an optional combiner). You provide the input key and value that
- * should be sent to the Mapper, and outputs you expect to be sent by the
- * Reducer to the collector for those inputs. By calling runTest(), the harness
- * will deliver the input to the Mapper, feed the intermediate results to the
- * Reducer (without checking them), and will check the Reducer's outputs against
- * the expected results. This is designed to handle the (k, v)* -> (k, v)* case
- * from the Mapper/Reducer pair, representing a single unit test.
- * 
- * If a combiner is specified, then it will be run exactly once after the Mapper
- * and before the Reducer.
+ * Harness that allows you to test a Mapper and a Reducer instance together You
+ * provide the input key and value that should be sent to the Mapper, and
+ * outputs you expect to be sent by the Reducer to the collector for those
+ * inputs. By calling runTest(), the harness will deliver the input to the
+ * Mapper, feed the intermediate results to the Reducer (without checking them),
+ * and will check the Reducer's outputs against the expected results. This is
+ * designed to handle a single (k, v)* -> (k, v)* case from the Mapper/Reducer
+ * pair, representing a single unit test.
  */
-@SuppressWarnings("deprecation")
-public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, V3> extends
-    MapReduceDriverBase<K1, V1, K2, V2, K3, V3> {
+public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, V3>
+    extends MapReduceDriverBase<K1, V1, K2, V2, K3, V3> {
 
   public static final Log LOG = LogFactory.getLog(MapReduceDriver.class);
 
   private Mapper<K1, V1, K2, V2> myMapper;
   private Reducer<K2, V2, K3, V3> myReducer;
-  private Reducer<K2, V2, K2, V2> myCombiner;
   private Counters counters;
 
   public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
@@ -60,38 +57,8 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
     counters = new Counters();
   }
 
-  public MapReduceDriver(final Mapper<K1, V1, K2, V2> m,
-      final Reducer<K2, V2, K3, V3> r, final Reducer<K2, V2, K2, V2> c) {
-    myMapper = m;
-    myReducer = r;
-    myCombiner = c;
-    counters = new Counters();
-  }
-
   public MapReduceDriver() {
     counters = new Counters();
-  }
-
-  /** @return the counters used in this test */
-  public Counters getCounters() {
-    return counters;
-  }
-
-  /**
-   * Sets the counters object to use for this test.
-   * 
-   * @param ctrs
-   *          The counters object to use.
-   */
-  public void setCounters(final Counters ctrs) {
-    this.counters = ctrs;
-  }
-
-  /** Sets the counters to use and returns self for fluent style */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounters(
-      final Counters ctrs) {
-    setCounters(ctrs);
-    return this;
   }
 
   /**
@@ -148,34 +115,26 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
     return myReducer;
   }
 
-  /**
-   * Sets the reducer object to use as a combiner for this test
-   * 
-   * @param c
-   *          The combiner object to use
-   */
-  public void setCombiner(Reducer<K2, V2, K2, V2> c) {
-    myCombiner = c;
+  /** @return the counters used in this test */
+  public Counters getCounters() {
+    return counters;
   }
 
   /**
-   * Identical to setCombiner(), but with fluent programming style
+   * Sets the counters object to use for this test.
    * 
-   * @param c
-   *          The Combiner to use
-   * @return this
+   * @param ctrs
+   *          The counters object to use.
    */
-  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCombiner(
-      Reducer<K2, V2, K2, V2> c) {
-    setCombiner(c);
+  public void setCounters(final Counters ctrs) {
+    this.counters = ctrs;
+  }
+
+  /** Sets the counters to use and returns self for fluent style */
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withCounters(
+      final Counters ctrs) {
+    setCounters(ctrs);
     return this;
-  }
-
-  /**
-   * @return the Combiner object being used for this test
-   */
-  public Reducer<K2, V2, K2, V2> getCombiner() {
-    return myCombiner;
   }
 
   /**
@@ -252,34 +211,6 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
     return this;
   }
 
-  /**
-   * The private class to manage starting the reduce phase is used for type
-   * genericity reasons. This class is used in the run() method.
-   */
-  private class ReducePhaseRunner<OUTKEY, OUTVAL> {
-    private List<Pair<OUTKEY, OUTVAL>> runReduce(
-        List<Pair<K2, List<V2>>> inputs, Reducer<K2, V2, OUTKEY, OUTVAL> reducer)
-        throws IOException {
-
-      List<Pair<OUTKEY, OUTVAL>> reduceOutputs = new ArrayList<Pair<OUTKEY, OUTVAL>>();
-
-      for (Pair<K2, List<V2>> input : inputs) {
-        K2 inputKey = input.getFirst();
-        List<V2> inputValues = input.getSecond();
-        StringBuilder sb = new StringBuilder();
-        formatValueList(inputValues, sb);
-        LOG.debug("Reducing input (" + inputKey.toString() + ", "
-            + sb.toString() + ")");
-
-        reduceOutputs.addAll(new ReduceDriver<K2, V2, OUTKEY, OUTVAL>(reducer)
-            .withCounters(getCounters()).withInputKey(inputKey)
-            .withInputValues(inputValues).run());
-      }
-
-      return reduceOutputs;
-    }
-  }
-
   public List<Pair<K3, V3>> run() throws IOException {
 
     List<Pair<K2, V2>> mapOutputs = new ArrayList<Pair<K2, V2>>();
@@ -289,26 +220,44 @@ public class MapReduceDriver<K1, V1, K2 extends Comparable<? super K2>, V2, K3, 
       LOG.debug("Mapping input " + input.toString() + ")");
 
       mapOutputs.addAll(new MapDriver<K1, V1, K2, V2>(myMapper)
-          .withInput(input).withCounters(getCounters()).run());
+          .withInput(input).withCounters(getCounters())
+          .withConfiguration(configuration).run());
     }
 
-    if (myCombiner != null) {
-      // User has specified a combiner. Run this and replace the mapper outputs
-      // with the result of the combiner.
-      LOG.debug("Starting combine phase with combiner: " + myCombiner);
-      mapOutputs = new ReducePhaseRunner<K2, V2>().runReduce(
-          shuffle(mapOutputs), myCombiner);
+    List<Pair<K2, List<V2>>> reduceInputs = shuffle(mapOutputs);
+    List<Pair<K3, V3>> reduceOutputs = new ArrayList<Pair<K3, V3>>();
+
+    for (Pair<K2, List<V2>> input : reduceInputs) {
+      K2 inputKey = input.getFirst();
+      List<V2> inputValues = input.getSecond();
+      StringBuilder sb = new StringBuilder();
+      formatValueList(inputValues, sb);
+      LOG.debug("Reducing input (" + inputKey.toString() + ", " + sb.toString()
+          + ")");
+
+      reduceOutputs.addAll(new ReduceDriver<K2, V2, K3, V3>(myReducer)
+          .withCounters(getCounters()).withConfiguration(configuration)
+          .withInputKey(inputKey).withInputValues(inputValues).run());
     }
 
-    // Run the reduce phase.
-    LOG.debug("Starting reduce phase with reducer: " + myReducer);
-    return new ReducePhaseRunner<K3, V3>().runReduce(shuffle(mapOutputs),
-        myReducer);
+    return reduceOutputs;
   }
 
   @Override
   public String toString() {
-    return "MapReduceDriver (" + myMapper + ", " + myReducer + ")";
+    return "MapReduceDriver (0.20+) (" + myMapper + ", " + myReducer + ")";
+  }
+
+  /**
+   * @param configuration
+   *          The configuration object that will given to the mapper and reducer
+   *          associated with the driver
+   * @return this driver object for fluent coding
+   */
+  public MapReduceDriver<K1, V1, K2, V2, K3, V3> withConfiguration(
+      Configuration configuration) {
+    setConfiguration(configuration);
+    return this;
   }
 
   /**

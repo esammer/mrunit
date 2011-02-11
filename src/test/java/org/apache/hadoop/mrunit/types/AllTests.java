@@ -15,32 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.hadoop.mrunit.mock;
+package org.apache.hadoop.mrunit.types;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-import org.apache.hadoop.mapred.InputSplit;
-import org.junit.Test;
+/**
+ * Test suite for all type objects in the common library
+ *
+ */
+public final class AllTests {
 
+  private AllTests() { }
 
-public class TestMockReporter extends TestCase {
+  public static Test suite() {
+    TestSuite suite = new TestSuite("Test for org.apache.hadoop.mrunit.types");
 
-  @Test
-  public void testGetInputSplitForMapper() {
-    InputSplit split = new MockReporter(MockReporter.ReporterType.Mapper, null).getInputSplit();
-    assertTrue(null != split);
-  }
-
-  // reporter is contractually obligated to throw an exception
-  // if the reducer tries to grab the input split.
-  @Test
-  public void testGetInputSplitForReducer() {
-    try {
-      new MockReporter(MockReporter.ReporterType.Reducer, null).getInputSplit();
-      fail(); // shouldn't get here
-    } catch (UnsupportedOperationException uoe) {
-      // expected this.
-    }
+    suite.addTestSuite(TestPair.class);
+    return suite;
   }
 }
-
